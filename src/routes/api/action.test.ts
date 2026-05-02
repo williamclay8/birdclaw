@@ -11,6 +11,9 @@ const addMuteMock = vi.fn();
 const removeMuteMock = vi.fn();
 const scoreInboxMock = vi.fn();
 const syncBlocksMock = vi.fn();
+const exportMentionsViaCachedBirdMock = vi.fn();
+const syncDirectMessagesViaCachedBirdMock = vi.fn();
+const syncTimelineCollectionMock = vi.fn();
 
 vi.mock("#/lib/blocks", () => ({
 	addBlock: (...args: unknown[]) => addBlockMock(...args),
@@ -33,6 +36,21 @@ vi.mock("#/lib/inbox", () => ({
 	scoreInbox: (...args: unknown[]) => scoreInboxMock(...args),
 }));
 
+vi.mock("#/lib/mentions-live", () => ({
+	exportMentionsViaCachedBird: (...args: unknown[]) =>
+		exportMentionsViaCachedBirdMock(...args),
+}));
+
+vi.mock("#/lib/dms-live", () => ({
+	syncDirectMessagesViaCachedBird: (...args: unknown[]) =>
+		syncDirectMessagesViaCachedBirdMock(...args),
+}));
+
+vi.mock("#/lib/timeline-collections-live", () => ({
+	syncTimelineCollection: (...args: unknown[]) =>
+		syncTimelineCollectionMock(...args),
+}));
+
 import { Route } from "./action";
 
 const POST = getRouteHandler(Route, "POST");
@@ -48,6 +66,9 @@ describe("api action route", () => {
 		removeMuteMock.mockReset();
 		scoreInboxMock.mockReset();
 		syncBlocksMock.mockReset();
+		exportMentionsViaCachedBirdMock.mockReset();
+		syncDirectMessagesViaCachedBirdMock.mockReset();
+		syncTimelineCollectionMock.mockReset();
 	});
 
 	it("dispatches scoreInbox actions", async () => {
@@ -201,6 +222,98 @@ describe("api action route", () => {
 			transport: "bird",
 		});
 		expect(syncBlocksMock).toHaveBeenCalledWith("acct_primary");
+	});
+
+	it("dispatches read-only live sync actions", async () => {
+		exportMentionsViaCachedBirdMock.mockResolvedValue({ ok: true });
+		syncTimelineCollectionMock.mockResolvedValue({ ok: true });
+		syncDirectMessagesViaCachedBirdMock.mockResolvedValue({ ok: true });
+
+		await POST({
+			request: new Request("http://localhost/api/action", {
+				method: "POST",
+				body: JSON.stringify({
+					kind: "syncMentions",
+					accountId: "acct_primary",
+					limit: "12",
+					refresh: "true",
+					cacheTtlMs: "45000",
+				}),
+			}),
+		});
+		await POST({
+			request: new Request("http://localhost/api/action", {
+				method: "POST",
+				body: JSON.stringify({
+					kind: "syncLikes",
+					accountId: "acct_primary",
+					limit: "25",
+					all: "true",
+					maxPages: "3",
+					refresh: "true",
+					cacheTtlMs: "30000",
+				}),
+			}),
+		});
+		await POST({
+			request: new Request("http://localhost/api/action", {
+				method: "POST",
+				body: JSON.stringify({
+					kind: "syncBookmarks",
+					accountId: "acct_primary",
+					limit: "50",
+					all: "true",
+				}),
+			}),
+		});
+		await POST({
+			request: new Request("http://localhost/api/action", {
+				method: "POST",
+				body: JSON.stringify({
+					kind: "syncDms",
+					accountId: "acct_primary",
+					limit: "7",
+					refresh: "true",
+				}),
+			}),
+		});
+
+		expect(exportMentionsViaCachedBirdMock).toHaveBeenCalledWith({
+			account: "acct_primary",
+			search: undefined,
+			replyFilter: "all",
+			limit: 12,
+			all: false,
+			maxPages: undefined,
+			refresh: true,
+			cacheTtlMs: 45000,
+		});
+		expect(syncTimelineCollectionMock).toHaveBeenCalledWith({
+			kind: "likes",
+			account: "acct_primary",
+			mode: "bird",
+			limit: 25,
+			all: true,
+			maxPages: 3,
+			refresh: true,
+			cacheTtlMs: 30000,
+		});
+		expect(syncTimelineCollectionMock).toHaveBeenCalledWith({
+			kind: "bookmarks",
+			account: "acct_primary",
+			mode: "bird",
+			limit: 50,
+			all: true,
+			maxPages: undefined,
+			refresh: false,
+			cacheTtlMs: undefined,
+		});
+		expect(syncDirectMessagesViaCachedBirdMock).toHaveBeenCalledWith({
+			account: "acct_primary",
+			limit: 7,
+			refresh: true,
+			cacheTtlMs: undefined,
+		});
 	});
 
 	it("rejects unknown actions", async () => {

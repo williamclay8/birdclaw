@@ -283,6 +283,7 @@ describe("cached live mentions", () => {
 		);
 		expect(listMentionsViaBirdMock).toHaveBeenCalledWith({
 			maxResults: 5,
+			username: "steipete",
 		});
 		expect(lookupUsersByHandlesMock).not.toHaveBeenCalled();
 

@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { AccountSwitcher } from "#/components/AccountSwitcher";
+import { SyncToolbar, type SyncTarget } from "#/components/SyncToolbar";
 import { TimelineCard } from "#/components/TimelineCard";
-import type { QueryEnvelope, QueryResponse, TimelineItem } from "#/lib/types";
+import type {
+	AccountRecord,
+	QueryEnvelope,
+	QueryResponse,
+	TimelineItem,
+} from "#/lib/types";
 import {
 	cx,
 	eyebrowClass,
@@ -34,16 +41,31 @@ export function SavedTimelineView({
 	const [items, setItems] = useState<TimelineItem[]>([]);
 	const [search, setSearch] = useState("");
 	const [refreshTick, setRefreshTick] = useState(0);
+	const [selectedAccountId, setSelectedAccountId] = useState("all");
+	const [loadingTargets, setLoadingTargets] = useState<SyncTarget[]>([]);
 
-	useEffect(() => {
+	function refreshStatus() {
 		fetch("/api/status")
 			.then((response) => response.json())
-			.then((data: QueryEnvelope) => setMeta(data));
+			.then((data: QueryEnvelope) => {
+				setMeta(data);
+				setSelectedAccountId((current) =>
+					current && current !== "all"
+						? current
+						: getDefaultAccount(data.accounts)?.id || "all",
+				);
+			});
+	}
+
+	useEffect(() => {
+		refreshStatus();
 	}, []);
 
 	useEffect(() => {
+		if (!selectedAccountId) return;
 		const url = new URL("/api/query", window.location.origin);
 		url.searchParams.set("resource", "home");
+		url.searchParams.set("account", selectedAccountId);
 		url.searchParams.set(filter, "true");
 		url.searchParams.set("refresh", String(refreshTick));
 		if (search.trim()) {
@@ -53,7 +75,7 @@ export function SavedTimelineView({
 		fetch(url)
 			.then((response) => response.json())
 			.then((data: QueryResponse) => setItems(data.items as TimelineItem[]));
-	}, [filter, refreshTick, search]);
+	}, [filter, refreshTick, search, selectedAccountId]);
 
 	const subtitle = useMemo(() => {
 		if (!meta) {
@@ -61,6 +83,35 @@ export function SavedTimelineView({
 		}
 		return `${items.length} visible · ${meta.transport.statusText}`;
 	}, [items.length, loadingLabel, meta]);
+
+	const accountOptions = meta?.accounts ?? [];
+	const selectedAccount =
+		accountOptions.find((account) => account.id === selectedAccountId) ??
+		getDefaultAccount(accountOptions);
+
+	async function syncTarget(target: SyncTarget) {
+		if (!selectedAccountId) return;
+		setLoadingTargets((current) => [...current, target]);
+
+		try {
+			await fetch("/api/action", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({
+					kind: syncActionKind(target),
+					accountId: selectedAccountId,
+					limit: 50,
+					refresh: true,
+				}),
+			});
+			refreshStatus();
+			setRefreshTick((value) => value + 1);
+		} finally {
+			setLoadingTargets((current) =>
+				current.filter((value) => value !== target),
+			);
+		}
+	}
 
 	async function replyToTweet(tweetId: string) {
 		const text = window.prompt("Reply text");
@@ -71,7 +122,7 @@ export function SavedTimelineView({
 			headers: { "content-type": "application/json" },
 			body: JSON.stringify({
 				kind: "replyTweet",
-				accountId: "acct_primary",
+				accountId: selectedAccount?.id ?? "acct_primary",
 				tweetId,
 				text,
 			}),
@@ -90,6 +141,18 @@ export function SavedTimelineView({
 						<p className={heroCopyClass}>{subtitle}</p>
 					</div>
 					<div className={heroControlsClass}>
+						{accountOptions.length > 0 ? (
+							<AccountSwitcher
+								accounts={accountOptions}
+								current={selectedAccountId}
+								onChange={(account) => setSelectedAccountId(account.id)}
+							/>
+						) : null}
+						<SyncToolbar
+							disabled={!selectedAccountId || selectedAccountId === "all"}
+							loadingTargets={loadingTargets}
+							onSync={syncTarget}
+						/>
 						<input
 							className={cx(textFieldClass, textFieldWideClass)}
 							onChange={(event) => setSearch(event.target.value)}
@@ -112,4 +175,22 @@ export function SavedTimelineView({
 			</div>
 		</main>
 	);
+}
+
+function getDefaultAccount(accounts: AccountRecord[]) {
+	return (
+		accounts.find((account) => account.isDefault) ??
+		accounts.find((account) => account.handle === "@vantaprivacy") ??
+		accounts[0]
+	);
+}
+
+function syncActionKind(target: SyncTarget) {
+	const actions = {
+		mentions: "syncMentions",
+		likes: "syncLikes",
+		bookmarks: "syncBookmarks",
+		dms: "syncDms",
+	} as const;
+	return actions[target];
 }

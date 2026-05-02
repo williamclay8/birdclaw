@@ -244,6 +244,52 @@ export interface InboxResponse {
 	};
 }
 
+export interface AccountAnalyticsSummary {
+	accountId: string;
+	handle: string;
+	name: string;
+	role: "project" | "personal" | "other";
+	mentions: number;
+	unrepliedMentions: number;
+	dms: number;
+	needsReplyDms: number;
+	uniqueMentionAuthors: number;
+	latestMentionAt?: string;
+}
+
+export interface SharedAudienceItem {
+	profile: ProfileRecord;
+	projectMentions: number;
+	personalMentions: number;
+	latestMentionAt: string;
+}
+
+export interface TopicSignal {
+	topic: string;
+	projectMentions: number;
+	personalMentions: number;
+	sampleText: string;
+}
+
+export interface ProjectOpportunityItem {
+	id: string;
+	accountId: string;
+	accountHandle: string;
+	text: string;
+	createdAt: string;
+	likeCount: number;
+	author: ProfileRecord;
+	reason: string;
+}
+
+export interface AnalyticsResponse {
+	accounts: AccountAnalyticsSummary[];
+	sharedAudience: SharedAudienceItem[];
+	topicSignals: TopicSignal[];
+	projectOpportunities: ProjectOpportunityItem[];
+	recommendations: string[];
+}
+
 export interface XurlPublicMetrics {
 	retweet_count?: number;
 	reply_count?: number;

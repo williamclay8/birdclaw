@@ -401,7 +401,10 @@ async function exportMentionsViaCachedLiveSource({
 	try {
 		const payload =
 			mode === "bird"
-				? await listMentionsViaBird({ maxResults: limit })
+				? await listMentionsViaBird({
+						maxResults: limit,
+						username: resolvedAccount.username,
+					})
 				: await fetchMentionsViaXurl({
 						resolvedAccount,
 						limit,

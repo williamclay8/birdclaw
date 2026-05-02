@@ -13,14 +13,17 @@ import { Route as MentionsRouteImport } from './routes/mentions'
 import { Route as LikesRouteImport } from './routes/likes'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as DmsRouteImport } from './routes/dms'
+import { Route as ContentRouteImport } from './routes/content'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as BlocksRouteImport } from './routes/blocks'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStatusRouteImport } from './routes/api/status'
 import { Route as ApiQueryRouteImport } from './routes/api/query'
 import { Route as ApiInboxRouteImport } from './routes/api/inbox'
+import { Route as ApiContentWorkflowRouteImport } from './routes/api/content-workflow'
 import { Route as ApiBlocksRouteImport } from './routes/api/blocks'
 import { Route as ApiAvatarRouteImport } from './routes/api/avatar'
+import { Route as ApiAnalyticsRouteImport } from './routes/api/analytics'
 import { Route as ApiActionRouteImport } from './routes/api/action'
 
 const MentionsRoute = MentionsRouteImport.update({
@@ -41,6 +44,11 @@ const InboxRoute = InboxRouteImport.update({
 const DmsRoute = DmsRouteImport.update({
   id: '/dms',
   path: '/dms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContentRoute = ContentRouteImport.update({
+  id: '/content',
+  path: '/content',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookmarksRoute = BookmarksRouteImport.update({
@@ -73,6 +81,11 @@ const ApiInboxRoute = ApiInboxRouteImport.update({
   path: '/api/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiContentWorkflowRoute = ApiContentWorkflowRouteImport.update({
+  id: '/api/content-workflow',
+  path: '/api/content-workflow',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiBlocksRoute = ApiBlocksRouteImport.update({
   id: '/api/blocks',
   path: '/api/blocks',
@@ -81,6 +94,11 @@ const ApiBlocksRoute = ApiBlocksRouteImport.update({
 const ApiAvatarRoute = ApiAvatarRouteImport.update({
   id: '/api/avatar',
   path: '/api/avatar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsRoute = ApiAnalyticsRouteImport.update({
+  id: '/api/analytics',
+  path: '/api/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiActionRoute = ApiActionRouteImport.update({
@@ -93,13 +111,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blocks': typeof BlocksRoute
   '/bookmarks': typeof BookmarksRoute
+  '/content': typeof ContentRoute
   '/dms': typeof DmsRoute
   '/inbox': typeof InboxRoute
   '/likes': typeof LikesRoute
   '/mentions': typeof MentionsRoute
   '/api/action': typeof ApiActionRoute
+  '/api/analytics': typeof ApiAnalyticsRoute
   '/api/avatar': typeof ApiAvatarRoute
   '/api/blocks': typeof ApiBlocksRoute
+  '/api/content-workflow': typeof ApiContentWorkflowRoute
   '/api/inbox': typeof ApiInboxRoute
   '/api/query': typeof ApiQueryRoute
   '/api/status': typeof ApiStatusRoute
@@ -108,13 +129,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blocks': typeof BlocksRoute
   '/bookmarks': typeof BookmarksRoute
+  '/content': typeof ContentRoute
   '/dms': typeof DmsRoute
   '/inbox': typeof InboxRoute
   '/likes': typeof LikesRoute
   '/mentions': typeof MentionsRoute
   '/api/action': typeof ApiActionRoute
+  '/api/analytics': typeof ApiAnalyticsRoute
   '/api/avatar': typeof ApiAvatarRoute
   '/api/blocks': typeof ApiBlocksRoute
+  '/api/content-workflow': typeof ApiContentWorkflowRoute
   '/api/inbox': typeof ApiInboxRoute
   '/api/query': typeof ApiQueryRoute
   '/api/status': typeof ApiStatusRoute
@@ -124,13 +148,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/blocks': typeof BlocksRoute
   '/bookmarks': typeof BookmarksRoute
+  '/content': typeof ContentRoute
   '/dms': typeof DmsRoute
   '/inbox': typeof InboxRoute
   '/likes': typeof LikesRoute
   '/mentions': typeof MentionsRoute
   '/api/action': typeof ApiActionRoute
+  '/api/analytics': typeof ApiAnalyticsRoute
   '/api/avatar': typeof ApiAvatarRoute
   '/api/blocks': typeof ApiBlocksRoute
+  '/api/content-workflow': typeof ApiContentWorkflowRoute
   '/api/inbox': typeof ApiInboxRoute
   '/api/query': typeof ApiQueryRoute
   '/api/status': typeof ApiStatusRoute
@@ -141,13 +168,16 @@ export interface FileRouteTypes {
     | '/'
     | '/blocks'
     | '/bookmarks'
+    | '/content'
     | '/dms'
     | '/inbox'
     | '/likes'
     | '/mentions'
     | '/api/action'
+    | '/api/analytics'
     | '/api/avatar'
     | '/api/blocks'
+    | '/api/content-workflow'
     | '/api/inbox'
     | '/api/query'
     | '/api/status'
@@ -156,13 +186,16 @@ export interface FileRouteTypes {
     | '/'
     | '/blocks'
     | '/bookmarks'
+    | '/content'
     | '/dms'
     | '/inbox'
     | '/likes'
     | '/mentions'
     | '/api/action'
+    | '/api/analytics'
     | '/api/avatar'
     | '/api/blocks'
+    | '/api/content-workflow'
     | '/api/inbox'
     | '/api/query'
     | '/api/status'
@@ -171,13 +204,16 @@ export interface FileRouteTypes {
     | '/'
     | '/blocks'
     | '/bookmarks'
+    | '/content'
     | '/dms'
     | '/inbox'
     | '/likes'
     | '/mentions'
     | '/api/action'
+    | '/api/analytics'
     | '/api/avatar'
     | '/api/blocks'
+    | '/api/content-workflow'
     | '/api/inbox'
     | '/api/query'
     | '/api/status'
@@ -187,13 +223,16 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlocksRoute: typeof BlocksRoute
   BookmarksRoute: typeof BookmarksRoute
+  ContentRoute: typeof ContentRoute
   DmsRoute: typeof DmsRoute
   InboxRoute: typeof InboxRoute
   LikesRoute: typeof LikesRoute
   MentionsRoute: typeof MentionsRoute
   ApiActionRoute: typeof ApiActionRoute
+  ApiAnalyticsRoute: typeof ApiAnalyticsRoute
   ApiAvatarRoute: typeof ApiAvatarRoute
   ApiBlocksRoute: typeof ApiBlocksRoute
+  ApiContentWorkflowRoute: typeof ApiContentWorkflowRoute
   ApiInboxRoute: typeof ApiInboxRoute
   ApiQueryRoute: typeof ApiQueryRoute
   ApiStatusRoute: typeof ApiStatusRoute
@@ -227,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/dms'
       fullPath: '/dms'
       preLoaderRoute: typeof DmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/content': {
+      id: '/content'
+      path: '/content'
+      fullPath: '/content'
+      preLoaderRoute: typeof ContentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookmarks': {
@@ -271,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/content-workflow': {
+      id: '/api/content-workflow'
+      path: '/api/content-workflow'
+      fullPath: '/api/content-workflow'
+      preLoaderRoute: typeof ApiContentWorkflowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/blocks': {
       id: '/api/blocks'
       path: '/api/blocks'
@@ -283,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/api/avatar'
       fullPath: '/api/avatar'
       preLoaderRoute: typeof ApiAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics': {
+      id: '/api/analytics'
+      path: '/api/analytics'
+      fullPath: '/api/analytics'
+      preLoaderRoute: typeof ApiAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/action': {
@@ -299,13 +359,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlocksRoute: BlocksRoute,
   BookmarksRoute: BookmarksRoute,
+  ContentRoute: ContentRoute,
   DmsRoute: DmsRoute,
   InboxRoute: InboxRoute,
   LikesRoute: LikesRoute,
   MentionsRoute: MentionsRoute,
   ApiActionRoute: ApiActionRoute,
+  ApiAnalyticsRoute: ApiAnalyticsRoute,
   ApiAvatarRoute: ApiAvatarRoute,
   ApiBlocksRoute: ApiBlocksRoute,
+  ApiContentWorkflowRoute: ApiContentWorkflowRoute,
   ApiInboxRoute: ApiInboxRoute,
   ApiQueryRoute: ApiQueryRoute,
   ApiStatusRoute: ApiStatusRoute,

@@ -92,6 +92,23 @@ describe("bird transport wrapper", () => {
 		});
 	});
 
+	it("passes a requested mentions username to bird", async () => {
+		process.env.BIRDCLAW_BIRD_COMMAND = "/tmp/bird";
+		execFileAsyncMock.mockResolvedValue({ stdout: "[]" });
+		const { listMentionsViaBird } = await import("./bird");
+
+		await listMentionsViaBird({
+			maxResults: 7,
+			username: "williamclay",
+		});
+
+		expect(execFileAsyncMock).toHaveBeenCalledWith(
+			"/tmp/bird",
+			["mentions", "-n", "7", "--user", "@williamclay", "--json"],
+			expect.objectContaining({ maxBuffer: expect.any(Number) }),
+		);
+	});
+
 	it("maps mention fallbacks and empty mention payloads", async () => {
 		process.env.BIRDCLAW_BIRD_COMMAND = "/tmp/bird";
 		execFileAsyncMock

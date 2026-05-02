@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { AccountSwitcher } from "#/components/AccountSwitcher";
 import { DmWorkspace } from "#/components/DmWorkspace";
+import { SyncToolbar, type SyncTarget } from "#/components/SyncToolbar";
 import type {
+	AccountRecord,
 	DmConversationItem,
 	DmMessageItem,
 	QueryEnvelope,
@@ -45,17 +48,32 @@ function DmsRoute() {
 	const [search, setSearch] = useState("");
 	const [replyDraft, setReplyDraft] = useState("");
 	const [refreshTick, setRefreshTick] = useState(0);
+	const [selectedAccountId, setSelectedAccountId] = useState("all");
+	const [loadingTargets, setLoadingTargets] = useState<SyncTarget[]>([]);
 
-	useEffect(() => {
+	function refreshStatus() {
 		fetch("/api/status")
 			.then((response) => response.json())
-			.then((data: QueryEnvelope) => setMeta(data));
+			.then((data: QueryEnvelope) => {
+				setMeta(data);
+				setSelectedAccountId((current) =>
+					current && current !== "all"
+						? current
+						: getDefaultAccount(data.accounts)?.id || "all",
+				);
+			});
+	}
+
+	useEffect(() => {
+		refreshStatus();
 	}, []);
 
 	useEffect(() => {
+		if (!selectedAccountId) return;
 		const controller = new AbortController();
 		const url = new URL("/api/query", window.location.origin);
 		url.searchParams.set("resource", "dms");
+		url.searchParams.set("account", selectedAccountId);
 		url.searchParams.set("replyFilter", replyFilter);
 		url.searchParams.set("minFollowers", minFollowers);
 		url.searchParams.set("minInfluenceScore", minInfluenceScore);
@@ -101,17 +119,43 @@ function DmsRoute() {
 		refreshTick,
 		replyFilter,
 		search,
+		selectedAccountId,
 		selectedConversationId,
 		sort,
 	]);
 
 	const selectedConversation =
 		items.find((item) => item.id === selectedConversationId) ?? null;
+	const accountOptions = meta?.accounts ?? [];
 
 	const subtitle = useMemo(() => {
 		if (!meta) return "Loading direct messages...";
 		return `${meta.stats.dms} conversations cached locally · filter by follower load or derived influence score`;
 	}, [meta]);
+
+	async function syncTarget(target: SyncTarget) {
+		if (!selectedAccountId) return;
+		setLoadingTargets((current) => [...current, target]);
+
+		try {
+			await fetch("/api/action", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({
+					kind: syncActionKind(target),
+					accountId: selectedAccountId,
+					limit: 50,
+					refresh: true,
+				}),
+			});
+			refreshStatus();
+			setRefreshTick((value) => value + 1);
+		} finally {
+			setLoadingTargets((current) =>
+				current.filter((value) => value !== target),
+			);
+		}
+	}
 
 	async function replyToConversation(conversationId: string) {
 		const text = replyDraft.trim();
@@ -194,6 +238,21 @@ function DmsRoute() {
 						<p className={heroCopyClass}>{subtitle}</p>
 					</div>
 					<div className={cx(heroControlsClass, heroControlsDmClass)}>
+						{accountOptions.length > 0 ? (
+							<AccountSwitcher
+								accounts={accountOptions}
+								current={selectedAccountId}
+								onChange={(account) => {
+									setSelectedConversationId(undefined);
+									setSelectedAccountId(account.id);
+								}}
+							/>
+						) : null}
+						<SyncToolbar
+							disabled={!selectedAccountId || selectedAccountId === "all"}
+							loadingTargets={loadingTargets}
+							onSync={syncTarget}
+						/>
 						<input
 							className={cx(textFieldClass, textFieldWideClass)}
 							onChange={(event) => setSearch(event.target.value)}
@@ -259,4 +318,22 @@ function DmsRoute() {
 			</div>
 		</main>
 	);
+}
+
+function getDefaultAccount(accounts: AccountRecord[]) {
+	return (
+		accounts.find((account) => account.isDefault) ??
+		accounts.find((account) => account.handle === "@vantaprivacy") ??
+		accounts[0]
+	);
+}
+
+function syncActionKind(target: SyncTarget) {
+	const actions = {
+		mentions: "syncMentions",
+		likes: "syncLikes",
+		bookmarks: "syncBookmarks",
+		dms: "syncDms",
+	} as const;
+	return actions[target];
 }

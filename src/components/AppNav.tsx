@@ -13,6 +13,7 @@ import { ThemeSlider } from "./ThemeSlider";
 const links = [
 	{ to: "/inbox", label: "Inbox" },
 	{ to: "/", label: "Home" },
+	{ to: "/content", label: "Studio" },
 	{ to: "/mentions", label: "Mentions" },
 	{ to: "/likes", label: "Likes" },
 	{ to: "/bookmarks", label: "Bookmarks" },

@@ -35,7 +35,13 @@ describe("home route", () => {
 		cleanup();
 	});
 
-	it("loads timeline items and posts replies", async () => {
+	it("loads timeline items and copies replies without posting", async () => {
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.assign(navigator, {
+			clipboard: {
+				writeText: writeTextMock,
+			},
+		});
 		const fetchMock = vi.fn(
 			async (input: RequestInfo | URL, init?: RequestInit) => {
 				const url = String(input);
@@ -77,11 +83,19 @@ describe("home route", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Ship it" }));
 
 		await waitFor(() => {
-			expect(fetchMock).toHaveBeenCalledWith(
-				"/api/action",
-				expect.objectContaining({ method: "POST" }),
-			);
+			expect(writeTextMock).toHaveBeenCalledWith("On it.");
 		});
+		expect(screen.getByRole("status")).toHaveTextContent(
+			"Copied reply to clipboard. Review in X before posting.",
+		);
+		expect(
+			fetchMock.mock.calls.some(
+				([url, init]) =>
+					String(url).endsWith("/api/action") &&
+					init?.method === "POST" &&
+					JSON.parse(String(init.body)).kind === "replyTweet",
+			),
+		).toBe(false);
 	});
 
 	it("trims search terms, changes reply filters, and ignores blank replies", async () => {

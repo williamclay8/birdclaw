@@ -13,6 +13,7 @@ __unconfig*
 todos.json
 .cta.json
 .playwright-home
+.playwright-cli
 coverage
 playwright-report
 test-results

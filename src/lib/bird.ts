@@ -221,15 +221,20 @@ function normalizeBirdTweets(items: BirdTweetItem[]): XurlMentionsResponse {
 
 export async function listMentionsViaBird({
 	maxResults,
+	username,
 }: {
 	maxResults: number;
+	username?: string;
 }): Promise<XurlMentionsResponse> {
 	const birdCommand = getBirdCommand();
-	const { stdout } = await execFileAsync(
-		birdCommand,
-		["mentions", "-n", String(maxResults), "--json"],
-		{ maxBuffer: BIRD_JSON_MAX_BUFFER_BYTES },
-	);
+	const args = ["mentions", "-n", String(maxResults)];
+	if (username?.trim()) {
+		args.push("--user", `@${username.trim().replace(/^@/, "")}`);
+	}
+	args.push("--json");
+	const { stdout } = await execFileAsync(birdCommand, args, {
+		maxBuffer: BIRD_JSON_MAX_BUFFER_BYTES,
+	});
 	const payload = parseBirdJson(stdout);
 
 	return normalizeBirdTweets(getBirdTweetItems(payload, "mentions"));

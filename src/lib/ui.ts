@@ -120,7 +120,28 @@ export const metricRowClass =
 export const actionRowClass = "flex items-center gap-2.5";
 
 export const actionButtonClass =
-	"action-button inline-flex items-center justify-center rounded-full border-0 bg-[var(--ink)] px-4 py-[11px] text-sm font-medium text-white transition duration-180 hover:-translate-y-px disabled:cursor-default disabled:opacity-55";
+	"action-button inline-flex items-center justify-center rounded-full border-0 bg-[var(--ink)] px-4 py-[11px] text-sm font-medium text-white transition duration-180 hover:-translate-y-px active:scale-[0.98] disabled:cursor-default disabled:opacity-55";
+
+export const accountSwitcherClass =
+	"account-switcher flex flex-wrap items-center gap-2.5";
+
+export const accountSwitchButtonClass =
+	"account-switch-button inline-flex min-h-10 items-center gap-3 rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_78%,transparent)] px-3 py-2 text-left text-[var(--ink-soft)] transition duration-180 hover:-translate-y-px hover:border-[var(--line-strong)] hover:text-[var(--ink)] disabled:cursor-default disabled:opacity-55";
+
+export const accountSwitchButtonActiveClass =
+	"account-switch-button-active border-[var(--line-strong)] bg-[var(--panel)] text-[var(--ink)] shadow-[0_14px_34px_var(--shadow)]";
+
+export const accountRoleBadgeClass =
+	"account-role-badge inline-flex rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]";
+
+export const accountRoleBadgePersonalClass =
+	"account-role-badge-personal bg-[color:color-mix(in_srgb,var(--ink-soft)_14%,transparent)] text-[var(--ink-soft)]";
+
+export const syncToolbarClass =
+	"sync-toolbar flex flex-wrap items-center gap-2.5";
+
+export const syncToolbarButtonClass =
+	"sync-toolbar-button inline-flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_78%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--ink-soft)] transition duration-180 hover:-translate-y-px hover:border-[var(--line-strong)] hover:text-[var(--ink)] disabled:cursor-default disabled:opacity-55";
 
 export const errorCopyClass = "mb-4 text-[var(--alert)]";
 
