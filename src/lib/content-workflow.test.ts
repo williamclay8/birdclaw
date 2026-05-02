@@ -123,7 +123,7 @@ describe("buildProjectContentWorkflow", () => {
 		expect(new Set(workflow.postDrafts.map((draft) => draft.id)).size).toBe(
 			workflow.postDrafts.length,
 		);
-		expect(workflow.personalPostDrafts).toHaveLength(11);
+		expect(workflow.personalPostDrafts).toHaveLength(13);
 		expect(workflow.personalPostDrafts).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
@@ -172,6 +172,18 @@ describe("buildProjectContentWorkflow", () => {
 					engagementGoal: "reply",
 					tension: expect.stringContaining("request context"),
 				}),
+				expect.objectContaining({
+					archetype: "offer receipt scout note",
+					engagementGoal: "bookmark",
+					tension: expect.stringContaining("server promise"),
+					artifactNeeded: expect.stringContaining("offer/receipt"),
+				}),
+				expect.objectContaining({
+					archetype: "signing-key scout note",
+					engagementGoal: "reply",
+					tension: expect.stringContaining("signing authority"),
+					replyEdge: expect.stringContaining("signing authority"),
+				}),
 			]),
 		);
 		expect(workflow.voiceBridgePairs).toEqual(
@@ -183,6 +195,22 @@ describe("buildProjectContentWorkflow", () => {
 					projectTranslation: expect.stringContaining("metadata minimization"),
 					proofBoundary: expect.stringContaining("reason string"),
 					artifactNeeded: expect.stringContaining("metadata"),
+				}),
+				expect.objectContaining({
+					personalDraftId: "personal-draft-offer-receipt-boundary",
+					projectDraftId: "vanta-draft-x402-offer-receipt",
+					scoutMechanism: expect.stringContaining("server promise"),
+					projectTranslation: expect.stringContaining("offer and receipt"),
+					proofBoundary: expect.stringContaining("receipt proves delivery"),
+					artifactNeeded: expect.stringContaining("offer/receipt"),
+				}),
+				expect.objectContaining({
+					personalDraftId: "personal-draft-signing-key-boundary",
+					projectDraftId: "vanta-draft-signing-key-boundary",
+					scoutMechanism: expect.stringContaining("key"),
+					projectTranslation: expect.stringContaining("signing authority"),
+					proofBoundary: expect.stringContaining("payment address"),
+					artifactNeeded: expect.stringContaining("signing-key"),
 				}),
 			]),
 		);

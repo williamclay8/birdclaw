@@ -342,3 +342,23 @@ The signing key for offers/receipts is a trust boundary, not incidental implemen
 New keeper draft:
 
 - the key that signs a receipt should be a boundary, not a shortcut. keep payment collection, offer terms, and delivery proof separate.
+
+## May 2 Personal Scout Bridge Loop
+
+Read-only study source: local Birdclaw SQLite checks, local `/content` dashboard/code inspection, and public non-X x402 references on May 2, 2026. No X write actions were taken.
+
+Source bounds: SQLite quick check passed. The local archive remains a small directional sample: 68 tweets total, 40 `@vantaprivacy` matches through April 30, 2026, and 23 `@williamclay` matches through April 24, 2026. Treat this as workflow and taste development, not statistical audience truth.
+
+### UI/UX Digestibility Decision
+
+The project queue had current offer/receipt and signing-key drafts, but the personal scout lane did not expose matching `@williamclay` prompts. The Voice Bridge now has personal-to-project pairs for:
+
+- server promise vs delivered service -> offer/receipt boundary field map
+- signing authority vs payment collection -> signing-key/payment-address boundary checklist
+
+This keeps the dashboard from asking the project account to carry every technical insight directly. `@williamclay` can scout the mechanism in plainer language, while `@vantaprivacy` turns it into proof-boundary, artifact-backed copy.
+
+### New Keeper Drafts
+
+- paid APIs get more interesting when the server has to prove what it promised and what it actually delivered.
+- the underrated agent-payment question is which key is allowed to prove the service happened.

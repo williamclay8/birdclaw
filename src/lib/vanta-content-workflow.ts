@@ -485,6 +485,28 @@ export function buildVantaVoiceBridgePairs({
 		artifactNeeded: "agent-payment metadata field map",
 	});
 	addPair({
+		personalDraftId: "personal-draft-offer-receipt-boundary",
+		projectDraftId: "vanta-draft-x402-offer-receipt",
+		scoutMechanism:
+			"paid APIs need proof of both the server promise and delivered service",
+		projectTranslation:
+			"turn offer and receipt fields into counterparty-verifiable proof without exposing extra request context",
+		proofBoundary:
+			"offer proves committed terms; receipt proves delivery; private notes and nonessential metadata stay local",
+		artifactNeeded: "offer/receipt boundary field map",
+	});
+	addPair({
+		personalDraftId: "personal-draft-signing-key-boundary",
+		projectDraftId: "vanta-draft-signing-key-boundary",
+		scoutMechanism:
+			"agent-payment trust depends on which key is allowed to prove service delivery",
+		projectTranslation:
+			"separate signing authority, payment collection, offer terms, receipt, and private note surfaces",
+		proofBoundary:
+			"signing key proves the receipt boundary; payment address collects funds; custody and security claims stay out",
+		artifactNeeded: "signing-key/payment-address boundary checklist",
+	});
+	addPair({
 		personalDraftId: "personal-draft-wallet-group-chat",
 		projectDraftId: "vanta-draft-recovery-surface",
 		scoutMechanism:

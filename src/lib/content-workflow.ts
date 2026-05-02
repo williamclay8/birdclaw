@@ -196,6 +196,34 @@ function buildPersonalPostDrafts(): PersonalPostDraft[] {
 			whyItMatters:
 				"Turns current x402 metadata risk into a personal-account mechanism read without making Vanta claims.",
 		},
+		{
+			id: "personal-draft-offer-receipt-boundary",
+			archetype: "offer receipt scout note",
+			body: "paid APIs get more interesting when the server has to prove what it promised and what it actually delivered.",
+			engagementGoal: "bookmark",
+			engagementPattern: "compressed_take",
+			tension: "server promise vs delivered service",
+			replyEdge:
+				"Agent and API builders can argue what should be promised, proven, and left out of the payment flow.",
+			artifactNeeded: "offer/receipt field map",
+			score: 73,
+			whyItMatters:
+				"Turns signed offers and receipts into a personal-account scout frame that can bridge into Vanta proof-boundary copy.",
+		},
+		{
+			id: "personal-draft-signing-key-boundary",
+			archetype: "signing-key scout note",
+			body: "the underrated agent-payment question is which key is allowed to prove the service happened.",
+			engagementGoal: "reply",
+			engagementPattern: "personal_observation",
+			tension: "signing authority vs payment collection",
+			replyEdge:
+				"Builders can argue where signing authority, payment collection, and private notes should be separated.",
+			artifactNeeded: "signing-key boundary checklist",
+			score: 71,
+			whyItMatters:
+				"Adds a sharper personal-account lane for the current x402 signing-key boundary without making Vanta safety claims.",
+		},
 	] as const;
 
 	return drafts.map((draft) => ({
