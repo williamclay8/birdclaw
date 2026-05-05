@@ -99,7 +99,7 @@ describe("inbox route", () => {
 		render(<InboxRoute />);
 
 		expect(await screen.findByText("DM from Sam Altman")).toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: "Score with OpenAI" }));
+		fireEvent.click(screen.getByRole("button", { name: "Rank queue" }));
 
 		await waitFor(() => {
 			expect(fetchMock).toHaveBeenCalledWith(

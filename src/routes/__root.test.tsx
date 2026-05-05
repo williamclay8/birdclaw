@@ -65,7 +65,7 @@ describe("root route", () => {
 		expect(markup).toContain("birdclaw nav");
 		expect(markup).toContain("child content");
 		expect(markup).toContain('data-testid="scripts"');
-		expect(markup).toContain("Tanstack Router");
-		expect(markup).toContain("router panel");
+		expect(markup).not.toContain("Tanstack Router");
+		expect(markup).not.toContain("router panel");
 	});
 });

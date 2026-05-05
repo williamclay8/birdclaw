@@ -11,6 +11,9 @@ import type {
 import {
 	cx,
 	eyebrowClass,
+	emptyPanelClass,
+	emptyPanelCopyClass,
+	emptyPanelTitleClass,
 	feedPageClass,
 	heroControlsClass,
 	heroCopyClass,
@@ -114,7 +117,7 @@ export function SavedTimelineView({
 	}
 
 	async function replyToTweet(tweetId: string) {
-		const text = window.prompt("Reply text");
+		const text = window.prompt("Draft a reply to copy");
 		if (!text?.trim()) return;
 
 		await fetch("/api/action", {
@@ -154,6 +157,7 @@ export function SavedTimelineView({
 							onSync={syncTarget}
 						/>
 						<input
+							aria-label={searchPlaceholder}
 							className={cx(textFieldClass, textFieldWideClass)}
 							onChange={(event) => setSearch(event.target.value)}
 							placeholder={searchPlaceholder}
@@ -162,18 +166,58 @@ export function SavedTimelineView({
 					</div>
 				</section>
 
-				<section className={timelineLaneClass}>
-					{items.map((item) => (
-						<TimelineCard
-							key={item.id}
-							item={item}
-							onReply={replyToTweet}
-							showReplyControls={false}
-						/>
-					))}
-				</section>
+				{items.length > 0 ? (
+					<section
+						aria-label={`${eyebrow} results`}
+						className={timelineLaneClass}
+					>
+						{items.map((item) => (
+							<TimelineCard
+								key={item.id}
+								item={item}
+								onReply={replyToTweet}
+								showReplyControls={false}
+							/>
+						))}
+					</section>
+				) : (
+					<SavedTimelineEmptyState
+						filter={filter}
+						hasMeta={Boolean(meta)}
+						hasSearch={Boolean(search.trim())}
+					/>
+				)}
 			</div>
 		</main>
+	);
+}
+
+function SavedTimelineEmptyState({
+	filter,
+	hasMeta,
+	hasSearch,
+}: {
+	filter: "liked" | "bookmarked";
+	hasMeta: boolean;
+	hasSearch: boolean;
+}) {
+	const noun = filter === "liked" ? "likes" : "bookmarks";
+	const title = !hasMeta
+		? `Loading your ${noun}`
+		: hasSearch
+			? `No ${noun} match that search`
+			: `No ${noun} saved yet`;
+	const copy = !hasMeta
+		? "Birdclaw is checking the local archive before it shows this lane."
+		: hasSearch
+			? "Try a different phrase or clear the search to return to the full lane."
+			: `Sync ${noun} for the selected account to bring this signal into view.`;
+
+	return (
+		<section aria-live="polite" className={emptyPanelClass}>
+			<h3 className={emptyPanelTitleClass}>{title}</h3>
+			<p className={emptyPanelCopyClass}>{copy}</p>
+		</section>
 	);
 }
 

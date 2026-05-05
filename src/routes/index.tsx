@@ -15,6 +15,9 @@ import type {
 import {
 	cx,
 	eyebrowClass,
+	emptyPanelClass,
+	emptyPanelCopyClass,
+	emptyPanelTitleClass,
 	feedPageClass,
 	heroControlsClass,
 	heroCopyClass,
@@ -94,8 +97,8 @@ function HomeRoute() {
 	}, [refreshTick, replyFilter, search, selectedAccountId]);
 
 	const subtitle = useMemo(() => {
-		if (!meta) return "Loading local context...";
-		return `${meta.stats.home} home items · ${meta.stats.needsReply} waiting on action · ${meta.transport.statusText}`;
+		if (!meta) return "Checking the local archive...";
+		return `${meta.stats.home} home items · ${meta.stats.needsReply} need judgment · ${meta.transport.statusText}`;
 	}, [meta]);
 
 	const accountOptions = meta?.accounts ?? [];
@@ -125,7 +128,7 @@ function HomeRoute() {
 	}
 
 	async function replyToTweet(_tweetId: string) {
-		const text = window.prompt("Reply text");
+		const text = window.prompt("Draft a reply to copy");
 		if (!text?.trim()) return;
 
 		try {
@@ -158,9 +161,7 @@ function HomeRoute() {
 				<section className={heroShellClass}>
 					<div>
 						<p className={eyebrowClass}>home timeline</p>
-						<h2 className={heroTitleClass}>
-							Read first. Act only where signal survives.
-						</h2>
+						<h2 className={heroTitleClass}>Find the signal worth answering.</h2>
 						<p className={heroCopyClass}>{subtitle}</p>
 					</div>
 					<div className={heroControlsClass}>
@@ -177,15 +178,21 @@ function HomeRoute() {
 							onSync={syncTarget}
 						/>
 						<input
+							aria-label="Search home timeline"
 							className={cx(textFieldClass, textFieldWideClass)}
 							onChange={(event) => setSearch(event.target.value)}
 							placeholder="Search local timeline"
 							value={search}
 						/>
-						<div className={segmentedClass}>
+						<div
+							aria-label="Reply filter"
+							className={segmentedClass}
+							role="group"
+						>
 							{(["all", "replied", "unreplied"] as const).map((value) => (
 								<button
 									key={value}
+									aria-pressed={value === replyFilter}
 									className={cx(
 										segmentClass,
 										value === replyFilter && segmentActiveClass,
@@ -203,13 +210,49 @@ function HomeRoute() {
 				<AnalyticsPanel analytics={analytics} />
 				<ContentWorkflowPanel workflow={contentWorkflow} />
 
-				<section className={timelineLaneClass}>
-					{items.map((item) => (
-						<TimelineCard key={item.id} item={item} onReply={replyToTweet} />
-					))}
-				</section>
+				{items.length > 0 ? (
+					<section
+						aria-label="Home timeline results"
+						className={timelineLaneClass}
+					>
+						{items.map((item) => (
+							<TimelineCard key={item.id} item={item} onReply={replyToTweet} />
+						))}
+					</section>
+				) : (
+					<EmptyTimelineState
+						hasMeta={Boolean(meta)}
+						hasSearch={Boolean(search.trim())}
+					/>
+				)}
 			</div>
 		</main>
+	);
+}
+
+function EmptyTimelineState({
+	hasMeta,
+	hasSearch,
+}: {
+	hasMeta: boolean;
+	hasSearch: boolean;
+}) {
+	const title = !hasMeta
+		? "Loading your local timeline"
+		: hasSearch
+			? "No saved posts match that search"
+			: "No home timeline items yet";
+	const copy = !hasMeta
+		? "Birdclaw is reading the local archive before it shows anything."
+		: hasSearch
+			? "Try a different phrase or clear the search to return to the full local feed."
+			: "Sync an account to bring recent home timeline signal into this workspace.";
+
+	return (
+		<section aria-live="polite" className={emptyPanelClass}>
+			<h3 className={emptyPanelTitleClass}>{title}</h3>
+			<p className={emptyPanelCopyClass}>{copy}</p>
+		</section>
 	);
 }
 
@@ -234,7 +277,7 @@ function ContentWorkflowPanel({
 					<p className={heroCopyClass}>{workflow.bridgeTheme}</p>
 				</div>
 				<span className="rounded-full border border-[var(--line)] bg-[var(--accent-soft)] px-3 py-2 text-sm font-medium text-[var(--accent)]">
-					manual only
+					manual review
 				</span>
 			</div>
 			<div className="grid gap-3 min-[860px]:grid-cols-[0.9fr_1.1fr]">
@@ -341,7 +384,9 @@ function AnalyticsPanel({
 				<MetricCard
 					label="Warm overlap"
 					value={analytics.sharedAudience.length}
-					secondary={topTopic ? `${topTopic.topic} is hot` : "building sample"}
+					secondary={
+						topTopic ? `${topTopic.topic} is rising` : "building sample"
+					}
 				/>
 			</div>
 			<div className={cx(stackGridClass, "min-[860px]:grid-cols-2")}>
@@ -388,7 +433,7 @@ function MetricCard({
 	secondary: string;
 }) {
 	return (
-		<div className="rounded-[16px] border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_76%,transparent)] p-4">
+		<div className="rounded-[16px] border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_76%,transparent)] p-4 tabular-nums">
 			<p className="m-0 text-[0.8rem] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
 				{label}
 			</p>

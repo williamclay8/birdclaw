@@ -130,7 +130,7 @@ function DmsRoute() {
 
 	const subtitle = useMemo(() => {
 		if (!meta) return "Loading direct messages...";
-		return `${meta.stats.dms} conversations cached locally · filter by follower load or derived influence score`;
+		return `${meta.stats.dms} conversations cached locally · filter by followers or priority score`;
 	}, [meta]);
 
 	async function syncTarget(target: SyncTarget) {

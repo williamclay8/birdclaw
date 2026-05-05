@@ -227,4 +227,51 @@ describe("SavedTimelineView", () => {
 		});
 		expect(promptSpy).toHaveBeenCalledTimes(2);
 	});
+
+	it("shows a useful empty state when a saved lane has no matches", async () => {
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+			const url = String(input);
+			if (url.endsWith("/api/status")) {
+				return new Response(
+					JSON.stringify({
+						stats: { home: 3, mentions: 1, dms: 4, needsReply: 2, inbox: 3 },
+						transport: { statusText: "local" },
+						accounts: [],
+						archives: [],
+					}),
+				);
+			}
+			if (url.includes("/api/query")) {
+				return new Response(
+					JSON.stringify({
+						resource: "home",
+						items: [],
+					}),
+				);
+			}
+			throw new Error(`Unexpected fetch ${url}`);
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		render(
+			<SavedTimelineView
+				eyebrow="bookmarks"
+				filter="bookmarked"
+				loadingLabel="Loading bookmarks..."
+				searchPlaceholder="Search bookmarks"
+				title="Bookmarks"
+			/>,
+		);
+
+		expect(
+			await screen.findByText("No bookmarks saved yet"),
+		).toBeInTheDocument();
+		fireEvent.change(screen.getByLabelText("Search bookmarks"), {
+			target: { value: "receipt" },
+		});
+
+		expect(
+			await screen.findByText("No bookmarks match that search"),
+		).toBeInTheDocument();
+	});
 });

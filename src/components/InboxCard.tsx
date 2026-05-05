@@ -76,7 +76,7 @@ export function InboxCard({
 					</span>
 				</div>
 			</div>
-			<p className={eyebrowClass}>ai triage</p>
+			<p className={eyebrowClass}>priority triage</p>
 			<h3 className={inboxTitleClass}>{item.title}</h3>
 			<p className={bodyCopyClass}>{item.text}</p>
 			<div className={inboxAnalysisClass}>
@@ -101,7 +101,7 @@ export function InboxCard({
 						className={actionButtonClass}
 						to={item.entityKind === "dm" ? "/dms" : "/mentions"}
 					>
-						Open
+						{item.entityKind === "dm" ? "Open DM" : "Open thread"}
 					</Link>
 				</div>
 			</div>

@@ -12,7 +12,7 @@ function BookmarksRoute() {
 			filter="bookmarked"
 			loadingLabel="Loading bookmarks..."
 			searchPlaceholder="Search bookmarks"
-			title="Saved threads, receipts, and future rabbit holes."
+			title="Saved threads, receipts, and things to revisit."
 		/>
 	);
 }

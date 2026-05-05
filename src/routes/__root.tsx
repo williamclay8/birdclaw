@@ -8,6 +8,9 @@ import { bodyClass, pageWrapClass, siteShellClass } from "#/lib/ui";
 
 import appCss from "../styles.css?url";
 
+const showDevtools =
+	import.meta.env.DEV && import.meta.env.VITE_BIRDCLAW_DEVTOOLS === "1";
+
 export const Route = createRootRoute({
 	head: () => ({
 		meta: [
@@ -51,17 +54,19 @@ function RootDocument({ children }: { children: ReactNode }) {
 						{children}
 					</div>
 				</ThemeProvider>
-				<TanStackDevtools
-					config={{
-						position: "bottom-right",
-					}}
-					plugins={[
-						{
-							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-					]}
-				/>
+				{showDevtools ? (
+					<TanStackDevtools
+						config={{
+							position: "bottom-right",
+						}}
+						plugins={[
+							{
+								name: "Tanstack Router",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+						]}
+					/>
+				) : null}
 				<Scripts />
 			</body>
 		</html>

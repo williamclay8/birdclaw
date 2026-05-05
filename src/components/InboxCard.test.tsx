@@ -85,7 +85,7 @@ describe("InboxCard", () => {
 		expect(screen.getByPlaceholderText("Reply to @sam")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
 		expect(
-			screen.getAllByRole("link", { name: "Open" }).at(-1),
+			screen.getAllByRole("link", { name: "Open DM" }).at(-1),
 		).toHaveAttribute("href", "/dms");
 	});
 
@@ -111,7 +111,7 @@ describe("InboxCard", () => {
 			screen.getByPlaceholderText("Reply to mention from @sam"),
 		).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
-		expect(screen.getByRole("link", { name: "Open" })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: "Open thread" })).toHaveAttribute(
 			"href",
 			"/mentions",
 		);

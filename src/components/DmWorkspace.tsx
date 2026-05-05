@@ -238,7 +238,9 @@ export function DmWorkspace({
 						</div>
 					</>
 				) : (
-					<div className={emptyStateClass}>No DM selected.</div>
+					<div className={emptyStateClass}>
+						Select a conversation to see context, history, and reply state.
+					</div>
 				)}
 			</div>
 		</section>

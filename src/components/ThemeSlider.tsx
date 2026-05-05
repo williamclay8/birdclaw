@@ -18,10 +18,10 @@ const THEME_OPTIONS = [
 	label: string;
 }>;
 
-const ACTIVE_ITEM_WIDTH_PX = 30;
-const GAP_PX = 6;
-const CONTAINER_PADDING_PX = 6;
-const INDICATOR_SIZE_PX = 30;
+const ACTIVE_ITEM_WIDTH_PX = 40;
+const GAP_PX = 4;
+const CONTAINER_PADDING_PX = 4;
+const INDICATOR_SIZE_PX = 36;
 const INDICATOR_OVERHANG_PX = (INDICATOR_SIZE_PX - ACTIVE_ITEM_WIDTH_PX) / 2;
 const INDICATOR_BASE_OFFSET_PX = CONTAINER_PADDING_PX - INDICATOR_OVERHANG_PX;
 
@@ -65,7 +65,7 @@ export function ThemeSlider() {
 			aria-label="Theme selector"
 		>
 			<div
-				className="theme-slider relative grid h-[42px] place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_86%,transparent)] shadow-[inset_0_1px_0_color-mix(in_srgb,white_40%,transparent)] transition-[background,border-color] duration-180"
+				className="theme-slider relative grid h-11 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_86%,transparent)] shadow-[inset_0_1px_0_color-mix(in_srgb,white_40%,transparent)] transition-[background,border-color] duration-180"
 				style={sliderStyle}
 			>
 				<div
@@ -102,7 +102,7 @@ export function ThemeSlider() {
 							key={option.key}
 							type="button"
 							className={cx(
-								"theme-slider-button relative z-[1] inline-flex size-[30px] items-center justify-center rounded-full border-0 bg-transparent text-[var(--ink-soft)] transition-[color,transform] duration-160 hover:-translate-y-px hover:text-[var(--ink)] disabled:cursor-default disabled:opacity-55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[color:color-mix(in_srgb,var(--accent)_54%,transparent)]",
+								"theme-slider-button relative z-[1] inline-flex size-10 items-center justify-center rounded-full border-0 bg-transparent text-[var(--ink-soft)] transition-[color,transform] duration-160 hover:-translate-y-px hover:text-[var(--ink)] disabled:cursor-default disabled:opacity-55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:color-mix(in_srgb,var(--accent)_54%,transparent)]",
 								isActive && "theme-slider-button-active text-[var(--ink)]",
 							)}
 							onClick={handleClick}

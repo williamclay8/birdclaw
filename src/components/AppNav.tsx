@@ -30,7 +30,9 @@ export function AppNav() {
 		<nav className={navClass}>
 			<div>
 				<p className={eyebrowClass}>birdclaw</p>
-				<h1 className={brandMarkClass}>Quiet signal for Twitter.</h1>
+				<h1 className={brandMarkClass}>
+					Quiet signal from your Twitter memory.
+				</h1>
 			</div>
 			<div className={navLinksClass}>
 				{links.map((link) => {
@@ -39,6 +41,7 @@ export function AppNav() {
 						<Link
 							key={link.to}
 							to={link.to}
+							aria-current={active ? "page" : undefined}
 							className={cx(navLinkClass, active && navLinkActiveClass)}
 						>
 							{link.label}

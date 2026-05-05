@@ -11,6 +11,9 @@ import {
 	actionButtonClass,
 	cx,
 	eyebrowClass,
+	emptyPanelClass,
+	emptyPanelCopyClass,
+	emptyPanelTitleClass,
 	feedPageClass,
 	heroControlsClass,
 	heroCopyClass,
@@ -70,7 +73,7 @@ function InboxRoute() {
 
 	const subtitle = useMemo(() => {
 		if (!meta || !stats) return "Ranking unreplied mentions and DMs...";
-		return `${stats.total} items in queue · ${stats.openai} OpenAI scored · ${meta.transport.statusText}`;
+		return `${stats.total} items in queue · ${stats.openai} optional AI scores · ${meta.transport.statusText}`;
 	}, [meta, stats]);
 
 	async function scoreNow() {
@@ -127,14 +130,21 @@ function InboxRoute() {
 				<section className={heroShellClass}>
 					<div>
 						<p className={eyebrowClass}>inbox</p>
-						<h2 className={heroTitleClass}>AI triage for mentions and DMs.</h2>
+						<h2 className={heroTitleClass}>
+							Find the replies worth your attention.
+						</h2>
 						<p className={heroCopyClass}>{subtitle}</p>
 					</div>
 					<div className={heroControlsClass}>
-						<div className={segmentedClass}>
+						<div
+							aria-label="Inbox type"
+							className={segmentedClass}
+							role="group"
+						>
 							{(["mixed", "mentions", "dms"] as const).map((value) => (
 								<button
 									key={value}
+									aria-pressed={value === kind}
 									className={cx(
 										segmentClass,
 										value === kind && segmentActiveClass,
@@ -147,10 +157,11 @@ function InboxRoute() {
 							))}
 						</div>
 						<input
+							aria-label="Minimum priority score"
 							className={cx(textFieldClass, textFieldShortClass)}
 							inputMode="numeric"
 							onChange={(event) => setMinScore(event.target.value)}
-							placeholder="Min AI score"
+							placeholder="Min score"
 							value={minScore}
 						/>
 						<button
@@ -166,32 +177,47 @@ function InboxRoute() {
 							onClick={() => void scoreNow()}
 							type="button"
 						>
-							{isScoring ? "Scoring..." : "Score with OpenAI"}
+							{isScoring ? "Ranking..." : "Rank queue"}
 						</button>
 					</div>
 				</section>
 
-				<section className={inboxLaneClass}>
-					{items.map((item) => (
-						<InboxCard
-							key={item.id}
-							isReplying={activeReplyId === item.id}
-							item={item}
-							onReplyChange={setReplyDraft}
-							onReplySend={() => void sendReply(item)}
-							onReplyToggle={() => {
-								if (activeReplyId === item.id) {
-									setActiveReplyId(null);
+				{items.length > 0 ? (
+					<section
+						aria-label="Priority inbox results"
+						className={inboxLaneClass}
+					>
+						{items.map((item) => (
+							<InboxCard
+								key={item.id}
+								isReplying={activeReplyId === item.id}
+								item={item}
+								onReplyChange={setReplyDraft}
+								onReplySend={() => void sendReply(item)}
+								onReplyToggle={() => {
+									if (activeReplyId === item.id) {
+										setActiveReplyId(null);
+										setReplyDraft("");
+										return;
+									}
+									setActiveReplyId(item.id);
 									setReplyDraft("");
-									return;
-								}
-								setActiveReplyId(item.id);
-								setReplyDraft("");
-							}}
-							replyDraft={activeReplyId === item.id ? replyDraft : ""}
-						/>
-					))}
-				</section>
+								}}
+								replyDraft={activeReplyId === item.id ? replyDraft : ""}
+							/>
+						))}
+					</section>
+				) : (
+					<section aria-live="polite" className={emptyPanelClass}>
+						<h3 className={emptyPanelTitleClass}>
+							No replies need attention under these filters
+						</h3>
+						<p className={emptyPanelCopyClass}>
+							Lower the score threshold, show low-signal items, or sync again to
+							refresh the queue.
+						</p>
+					</section>
+				)}
 			</div>
 			{isSendingReply ? (
 				<p className={timestampClass}>Sending reply...</p>

@@ -30,7 +30,7 @@ export const navClass =
 export const navLinksClass = "nav-links flex flex-wrap items-center gap-2.5";
 
 export const navLinkClass =
-	"nav-link inline-flex items-center rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_76%,transparent)] px-4 py-2.5 text-[var(--ink-soft)] transition duration-180 hover:-translate-y-px hover:border-[var(--line-strong)] hover:text-[var(--ink)]";
+	"nav-link inline-flex min-h-10 items-center rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_76%,transparent)] px-4 py-2.5 text-[var(--ink-soft)] outline-none transition-[transform,border-color,color,background-color,box-shadow] duration-180 hover:-translate-y-px hover:border-[var(--line-strong)] hover:text-[var(--ink)] focus-visible:shadow-[0_0_0_3px_var(--accent-soft),0_16px_42px_var(--shadow)] active:scale-[0.96]";
 
 export const navLinkActiveClass =
 	"nav-link-active border-[var(--line-strong)] bg-[var(--panel)] text-[var(--ink)] shadow-[0_16px_42px_var(--shadow)]";
@@ -54,7 +54,7 @@ export const heroControlsDmClass = "max-w-[420px]";
 export const heroControlsBlocksClass = "max-w-[560px]";
 
 export const textFieldClass =
-	"text-field w-full rounded-2xl border border-[var(--line)] bg-[var(--panel)] px-3.5 py-3 text-[var(--ink)] shadow-[0_18px_40px_var(--shadow)] outline-none transition duration-180 placeholder:text-[var(--ink-soft)] focus:border-[var(--line-strong)] disabled:cursor-default disabled:opacity-55";
+	"text-field w-full rounded-2xl border border-[var(--line)] bg-[var(--panel)] px-3.5 py-3 text-[var(--ink)] shadow-[0_18px_40px_var(--shadow)] outline-none transition-[border-color,box-shadow,background-color,color] duration-180 placeholder:text-[var(--ink-soft)] focus:border-[var(--line-strong)] focus-visible:shadow-[0_0_0_3px_var(--accent-soft),0_18px_40px_var(--shadow)] disabled:cursor-default disabled:opacity-55";
 
 export const textFieldWideClass = "w-[min(360px,100%)] max-[760px]:w-full";
 
@@ -65,7 +65,7 @@ export const segmentedClass =
 	"inline-flex gap-1.5 rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_76%,transparent)] p-1.5";
 
 export const segmentClass =
-	"segment rounded-full border-0 bg-transparent px-3.5 py-2.5 text-[var(--ink-soft)] transition duration-180";
+	"segment min-h-10 rounded-full border-0 bg-transparent px-3.5 py-2.5 text-[var(--ink-soft)] outline-none transition-[transform,background-color,color,box-shadow] duration-180 focus-visible:shadow-[0_0_0_3px_var(--accent-soft)] active:scale-[0.96]";
 
 export const segmentActiveClass =
 	"segment-active bg-[var(--panel)] text-[var(--ink)] shadow-[0_8px_22px_var(--shadow)]";
@@ -115,12 +115,12 @@ export const inboxAnalysisClass =
 	"inbox-analysis pb-1 pt-4 text-[var(--ink-soft)] [&_p]:mt-2 [&_p]:mb-0";
 
 export const metricRowClass =
-	"metric-row flex flex-wrap gap-3.5 text-[0.9rem] text-[var(--ink-soft)]";
+	"metric-row flex flex-wrap gap-3.5 text-[0.9rem] text-[var(--ink-soft)] tabular-nums";
 
 export const actionRowClass = "flex items-center gap-2.5";
 
 export const actionButtonClass =
-	"action-button inline-flex items-center justify-center rounded-full border-0 bg-[var(--ink)] px-4 py-[11px] text-sm font-medium text-white transition duration-180 hover:-translate-y-px active:scale-[0.98] disabled:cursor-default disabled:opacity-55";
+	"action-button inline-flex min-h-10 items-center justify-center rounded-full border-0 bg-[var(--ink)] px-4 py-[11px] text-sm font-medium text-white outline-none transition-[transform,opacity,background-color,box-shadow] duration-180 hover:-translate-y-px focus-visible:shadow-[0_0_0_3px_var(--accent-soft)] active:scale-[0.96] disabled:cursor-default disabled:opacity-55";
 
 export const accountSwitcherClass =
 	"account-switcher flex flex-wrap items-center gap-2.5";
@@ -149,7 +149,7 @@ export const composerShellClass =
 	"mt-2.5 border-t border-[var(--line)] pt-[18px]";
 
 export const composerInputClass =
-	"composer-input min-h-[120px] w-full resize-y rounded-[18px] border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_88%,transparent)] px-4 py-4 text-[var(--ink)] shadow-[inset_0_1px_0_color-mix(in_srgb,white_36%,transparent)] outline-none transition duration-180 placeholder:text-[var(--ink-soft)] focus:border-[var(--line-strong)]";
+	"composer-input min-h-[120px] w-full resize-y rounded-[18px] border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_88%,transparent)] px-4 py-4 text-[var(--ink)] shadow-[inset_0_1px_0_color-mix(in_srgb,white_36%,transparent)] outline-none transition-[border-color,box-shadow,background-color,color] duration-180 placeholder:text-[var(--ink-soft)] focus:border-[var(--line-strong)] focus-visible:shadow-[0_0_0_3px_var(--accent-soft),inset_0_1px_0_color-mix(in_srgb,white_36%,transparent)]";
 
 export const composerBarClass =
 	"flex items-center justify-between gap-4 pt-3 max-[760px]:flex-col max-[760px]:items-start";
@@ -239,6 +239,15 @@ export const avatarChipLargeClass =
 	"avatar-chip-large mb-3.5 size-16 rounded-[20px]";
 
 export const emptyStateClass = "py-6 text-[var(--ink-soft)]";
+
+export const emptyPanelClass =
+	"mx-auto grid w-full max-w-[680px] gap-2 rounded-[24px] border border-dashed border-[var(--line-strong)] bg-[color:color-mix(in_srgb,var(--panel)_72%,transparent)] p-6 text-center shadow-[0_18px_42px_var(--shadow)]";
+
+export const emptyPanelTitleClass =
+	"m-0 font-display text-[1.45rem] leading-tight text-[var(--ink)]";
+
+export const emptyPanelCopyClass =
+	"m-0 text-[0.98rem] leading-relaxed text-[var(--ink-soft)]";
 
 export const profilePreviewClass = "profile-preview relative inline-flex";
 
