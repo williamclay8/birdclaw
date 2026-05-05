@@ -120,6 +120,13 @@ describe("Vanta content workflow", () => {
 				sourceOpportunityId: "tweet_1",
 			}),
 		]);
+		expect(first.engagementTargets).toEqual([
+			expect.objectContaining({
+				handle: "merchantdesk",
+				niche: expect.stringContaining("merchant"),
+				reason: expect.any(String),
+			}),
+		]);
 	});
 
 	it("adds UI-actionable priority, evidence, and review metadata", () => {
@@ -182,6 +189,12 @@ describe("Vanta content workflow", () => {
 						passed: true,
 					}),
 				],
+				algorithmFit: expect.objectContaining({
+					candidatePath: expect.stringContaining("Project lane"),
+					rankingSignal: expect.stringContaining("repost"),
+					targetReader: expect.stringContaining("@merchantdesk"),
+					normalHumanWhy: expect.stringContaining("normal reader"),
+				}),
 			}),
 		);
 		expect(metadataDraft).toEqual(
@@ -263,6 +276,10 @@ describe("Vanta content workflow", () => {
 						passed: true,
 					}),
 				]),
+				algorithmFit: expect.objectContaining({
+					candidatePath: expect.stringContaining("Conversation lane"),
+					rankingSignal: expect.stringContaining("reply probability"),
+				}),
 			}),
 		);
 		expect(plan.postDrafts.every((draft) => draft.approvedToPost)).toBe(false);
@@ -289,6 +306,10 @@ describe("Vanta content workflow", () => {
 						passed: true,
 					}),
 				]),
+				algorithmFit: expect.objectContaining({
+					candidatePath: expect.stringContaining("Personal scout lane"),
+					targetReader: expect.stringContaining("@merchantdesk"),
+				}),
 			}),
 		);
 		expect(plan.personalPostDrafts.every((draft) => draft.approvedToPost)).toBe(

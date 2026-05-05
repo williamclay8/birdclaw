@@ -362,3 +362,31 @@ This keeps the dashboard from asking the project account to carry every technica
 
 - paid APIs get more interesting when the server has to prove what it promised and what it actually delivered.
 - the underrated agent-payment question is which key is allowed to prove the service happened.
+
+## May 5 Algorithm-Fit Loop
+
+Read-only study source: full-blast local subagent pass, local Birdclaw SQLite/archive checks, `/content` UI inspection, and current public references for X recommendation architecture plus creator tools. No X write actions were taken.
+
+Source bounds: the local archive slice is still small and noisy: mostly mentions, very little home/like/bookmark signal, and no statistically reliable shared-audience truth. Treat this as a better workflow and taste loop, not an audience model.
+
+### Product Direction
+
+The content dashboard should explain the recommendation like an operator would:
+
+- candidate path: personal scout, project post, or reply lane
+- ranking signal: reply, save, share, proof/artifact dwell, or clean agreement
+- target reader: the actual engaged account or warm niche this draft should help
+- normal-human reason: why someone understands the post before knowing Vanta
+- proof boundary: what can be checked, what stays local, what artifact is missing
+
+### Signal Quality
+
+Broad collaboration and followback mentions should not outrank specific receipt, permission, recovery, merchant metadata, x402, or agent-wallet language. Downrank promo/collab noise before the post-draft bank sees it.
+
+### Keeper Drafts
+
+- private settlement needs one public surface: the receipt. enough to verify, not enough to leak the workflow.
+- the part after the refund drama is the product: who approved it, what changed, what can be proven, what stays out of view.
+- when every API becomes a checkout, the missing UI is policy: amount, route, purpose, expiry, revocation, receipt.
+- merchant privacy is usually metadata privacy. the payment can be visible while the invoice id, customer context, payout reason, and internal note stay out of the broadcast.
+- launch culture is mostly a stress test for whether the explanation can survive the chart.

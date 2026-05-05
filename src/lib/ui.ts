@@ -22,12 +22,13 @@ export const eyebrowClass =
 	"m-0 mb-2 text-[11px] uppercase tracking-[0.24em] text-[var(--ink-soft)]";
 
 export const brandMarkClass =
-	"m-0 max-w-[12ch] font-display text-[clamp(1.8rem,3vw,3.2rem)] leading-[0.95] font-semibold";
+	"m-0 max-w-[16ch] font-display text-[clamp(1.35rem,2.2vw,2.35rem)] leading-[0.98] font-semibold";
 
 export const navClass =
-	"flex items-end justify-between gap-6 border-b border-[var(--line)] py-[18px] pb-5 max-[760px]:flex-col max-[760px]:items-start";
+	"flex items-end justify-between gap-5 border-b border-[var(--line)] py-4 pb-4 max-[760px]:flex-col max-[760px]:items-start";
 
-export const navLinksClass = "nav-links flex flex-wrap items-center gap-2.5";
+export const navLinksClass =
+	"nav-links flex flex-wrap items-center gap-2.5 max-[760px]:w-full max-[760px]:flex-nowrap max-[760px]:overflow-x-auto max-[760px]:pb-1";
 
 export const navLinkClass =
 	"nav-link inline-flex min-h-10 items-center rounded-full border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_76%,transparent)] px-4 py-2.5 text-[var(--ink-soft)] outline-none transition-[transform,border-color,color,background-color,box-shadow] duration-180 hover:-translate-y-px hover:border-[var(--line-strong)] hover:text-[var(--ink)] focus-visible:shadow-[0_0_0_3px_var(--accent-soft),0_16px_42px_var(--shadow)] active:scale-[0.96]";

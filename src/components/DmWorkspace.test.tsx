@@ -81,7 +81,11 @@ describe("DmWorkspace", () => {
 			/>,
 		);
 
-		expect(screen.getByText("No DM selected.")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Select a conversation to see context, history, and reply state.",
+			),
+		).toBeInTheDocument();
 	});
 
 	it("renders clear thread metadata and outbound bubbles", () => {

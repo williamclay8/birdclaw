@@ -621,6 +621,7 @@ function ContentRoute() {
 					kind: "Project",
 				}),
 			reviewChecklist: draft.reviewChecklist,
+			algorithmFit: draft.algorithmFit,
 			topPickEligible: isTopPickEligible({
 				artifactNeeded: draft.artifactNeeded,
 				kind: "Project",
@@ -644,6 +645,7 @@ function ContentRoute() {
 			artifactNeeded: undefined,
 			proofBoundary: defaultProofBoundaryForMove({ kind: "Reply" }),
 			reviewChecklist: undefined,
+			algorithmFit: prompt.algorithmFit,
 			topPickEligible: true,
 		}));
 		const personal = filteredPersonalDrafts.map((draft) => ({
@@ -670,6 +672,7 @@ function ContentRoute() {
 					kind: "Personal",
 				}),
 			reviewChecklist: draft.reviewChecklist,
+			algorithmFit: draft.algorithmFit,
 			topPickEligible: true,
 		}));
 		return [...drafts, ...personal, ...replies]
@@ -743,23 +746,23 @@ function ContentRoute() {
 				) : null}
 				<section className={cx(heroShellClass, "py-5 pb-4")}>
 					<div>
-						<p className={eyebrowClass}>content studio</p>
+						<p className={eyebrowClass}>today command center</p>
 						<h2
 							className={cx(
 								heroTitleClass,
 								"max-w-[15ch] text-[clamp(2.1rem,3.6vw,3.8rem)]",
 							)}
 						>
-							Turn timeline signal into safer posts worth publishing
+							What to post next, who it is for, and why it can travel
 						</h2>
 						<p className={heroCopyClass}>
-							Birdclaw ranks your strongest local signals, drafts posts for each
-							account, shows the evidence, and keeps publishing manual.
+							Birdclaw ranks local X signal against voice, proof, and algorithm
+							fit, then leaves the final post manual.
 						</p>
 					</div>
 					<div className="grid w-full min-w-0 max-w-[360px] gap-3 rounded-[18px] border border-[var(--line)] bg-[color:color-mix(in_srgb,var(--panel-strong)_78%,transparent)] p-4 max-[760px]:max-w-none">
 						<div className="flex flex-wrap items-center justify-between gap-2">
-							<p className={cx(eyebrowClass, "mb-0")}>Next manual move</p>
+							<p className={cx(eyebrowClass, "mb-0")}>Today pick</p>
 							<a
 								className="min-h-10 rounded-full bg-[var(--ink)] px-3 py-2 text-sm font-medium text-white no-underline transition-[transform,box-shadow] duration-180 hover:shadow-[0_10px_24px_var(--shadow)] active:scale-[0.96]"
 								href="#best-move"
@@ -776,6 +779,12 @@ function ContentRoute() {
 									<p className="m-0 text-[0.9rem] leading-relaxed text-[var(--ink-soft)]">
 										{primaryMove.action}
 									</p>
+									{primaryMove.algorithmFit ? (
+										<p className="m-0 text-[0.82rem] leading-relaxed text-[var(--ink-soft)]">
+											For {primaryMove.algorithmFit.targetReader};{" "}
+											{primaryMove.algorithmFit.rankingSignal}
+										</p>
+									) : null}
 								</div>
 								<PublishReadinessStrip
 									artifactNeeded={primaryMove.artifactNeeded}
@@ -966,6 +975,10 @@ function ContentRoute() {
 										artifactNeeded={primaryMove.artifactNeeded}
 										kind={primaryMove.kind}
 										voiceTarget={voiceTargetForMove(primaryMove.kind)}
+									/>
+									<AlgorithmFitPanel
+										fit={primaryMove.algorithmFit}
+										targets={workflow?.engagementTargets ?? []}
 									/>
 									<ArtifactWorkbench
 										gate={primaryMoveCopyGate}
@@ -1291,6 +1304,9 @@ function ContentRoute() {
 										</DetailsPanel>
 									</article>
 								))}
+								<EngagementTargetsPanel
+									targets={workflow?.engagementTargets ?? []}
+								/>
 							</div>
 						) : null}
 
@@ -1951,6 +1967,140 @@ function MoveDecisionBrief({
 				<span className="font-medium text-[var(--ink)]">Voice check:</span>{" "}
 				{voiceTarget}
 			</p>
+		</section>
+	);
+}
+
+function AlgorithmFitPanel({
+	fit,
+	targets,
+}: {
+	fit?: ProjectContentWorkflow["postDrafts"][number]["algorithmFit"];
+	targets: ProjectContentWorkflow["engagementTargets"];
+}) {
+	const topTarget = targets[0];
+	if (!fit && !topTarget) return null;
+	const items = fit
+		? [
+				["Candidate path", fit.candidatePath],
+				["Ranking signal", fit.rankingSignal],
+				["Target reader", fit.targetReader],
+				["Travel reason", fit.whyItCanTravel],
+				["Normal-human read", fit.normalHumanWhy],
+			]
+		: [];
+
+	return (
+		<section
+			aria-label="Algorithm fit"
+			className="grid gap-3 rounded-[16px] bg-[color:color-mix(in_srgb,var(--accent-soft)_34%,var(--panel-strong))] p-4 shadow-[inset_0_0_0_1px_var(--line)]"
+		>
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<p className={cx(eyebrowClass, "mb-0")}>Algorithm fit</p>
+				<span className="rounded-full bg-[var(--panel)] px-2.5 py-1 text-[0.76rem] font-medium text-[var(--ink-soft)] shadow-[inset_0_0_0_1px_var(--line)]">
+					Candidate + ranking read
+				</span>
+			</div>
+			{items.length ? (
+				<div className="grid gap-2 min-[720px]:grid-cols-2">
+					{items.map(([label, value]) => (
+						<div
+							className="min-w-0 rounded-[12px] bg-[var(--panel)] p-2.5 shadow-[inset_0_0_0_1px_var(--line)]"
+							key={label}
+						>
+							<p className="m-0 text-[0.72rem] font-medium uppercase tracking-[0.1em] text-[var(--ink-soft)]">
+								{label}
+							</p>
+							<p className="m-0 mt-1 break-words text-sm font-medium leading-snug text-[var(--ink)]">
+								{value}
+							</p>
+						</div>
+					))}
+				</div>
+			) : null}
+			{topTarget ? (
+				<p className="m-0 text-[0.88rem] leading-relaxed text-[var(--ink-soft)]">
+					<span className="font-medium text-[var(--ink)]">
+						Actual engaged target:
+					</span>{" "}
+					@{topTarget.handle} ({topTarget.niche}) - {topTarget.reason}
+				</p>
+			) : (
+				<p className="m-0 text-[0.88rem] leading-relaxed text-[var(--ink-soft)]">
+					No warm engaged target is visible in this local slice yet; treat the
+					algorithm read as directional until the archive gets fresher.
+				</p>
+			)}
+			{fit?.source ? (
+				<p className="m-0 text-[0.8rem] leading-relaxed text-[var(--ink-soft)]">
+					{fit.source}
+				</p>
+			) : null}
+		</section>
+	);
+}
+
+function EngagementTargetsPanel({
+	targets,
+}: {
+	targets: ProjectContentWorkflow["engagementTargets"];
+}) {
+	const visibleTargets = targets.slice(0, 4);
+	return (
+		<section
+			aria-label="Actual engaged people"
+			className="grid gap-3 rounded-[16px] bg-[color:color-mix(in_srgb,var(--accent-soft)_34%,var(--panel-strong))] p-4 shadow-[inset_0_0_0_1px_var(--line)]"
+		>
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<div>
+					<p className={cx(eyebrowClass, "mb-1")}>Actual engaged people</p>
+					<h4 className="m-0 text-sm font-semibold text-[var(--ink)]">
+						Who the next post should be useful to
+					</h4>
+				</div>
+				<span className="rounded-full bg-[var(--panel)] px-2.5 py-1 text-[0.76rem] font-medium tabular-nums text-[var(--ink-soft)] shadow-[inset_0_0_0_1px_var(--line)]">
+					{targets.length} local targets
+				</span>
+			</div>
+			{visibleTargets.length ? (
+				<div className="grid gap-2 min-[860px]:grid-cols-2">
+					{visibleTargets.map((target) => (
+						<article
+							className="grid min-w-0 gap-2 rounded-[12px] bg-[var(--panel)] p-3 shadow-[inset_0_0_0_1px_var(--line)]"
+							key={target.handle}
+						>
+							<div className="flex flex-wrap items-start justify-between gap-2">
+								<div>
+									<p className="m-0 text-sm font-medium text-[var(--ink)]">
+										@{target.handle}
+									</p>
+									<p className="m-0 text-[0.82rem] text-[var(--ink-soft)]">
+										{target.displayName}
+									</p>
+								</div>
+								<span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[0.76rem] font-medium tabular-nums text-[var(--accent)]">
+									{target.score}
+								</span>
+							</div>
+							<p className="m-0 text-[0.88rem] leading-relaxed text-[var(--ink)]">
+								{target.niche}
+							</p>
+							<p className="m-0 break-words text-[0.82rem] leading-relaxed text-[var(--ink-soft)]">
+								{target.evidence}
+							</p>
+							<p className="m-0 break-words text-[0.82rem] leading-relaxed text-[var(--ink-soft)]">
+								{target.nextAction}
+							</p>
+						</article>
+					))}
+				</div>
+			) : (
+				<p className="m-0 text-sm leading-relaxed text-[var(--ink-soft)]">
+					No warm engaged targets in this local slice yet. Sync newer mentions,
+					likes, bookmarks, and home-timeline data before treating this as
+					audience truth.
+				</p>
+			)}
 		</section>
 	);
 }

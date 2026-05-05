@@ -1,6 +1,7 @@
 import type {
 	AnalyticsResponse,
 	ProjectOpportunityItem,
+	SharedAudienceItem,
 	TopicSignal,
 } from "./types";
 
@@ -143,6 +144,25 @@ export interface VantaProofBoundary {
 	betaLimit: string;
 }
 
+export interface VantaAlgorithmFit {
+	candidatePath: string;
+	rankingSignal: string;
+	targetReader: string;
+	whyItCanTravel: string;
+	normalHumanWhy: string;
+	source: string;
+}
+
+export interface VantaEngagementTarget {
+	handle: string;
+	displayName: string;
+	niche: string;
+	score: number;
+	reason: string;
+	evidence: string;
+	nextAction: string;
+}
+
 export interface VantaContentPillar {
 	title: string;
 	topic: string;
@@ -174,6 +194,7 @@ export interface VantaPostDraft {
 	sourceEvidence: string[];
 	reviewChecklist: VantaReviewChecklistItem[];
 	proofBoundary: VantaProofBoundary;
+	algorithmFit: VantaAlgorithmFit;
 }
 
 export interface PersonalPostDraft {
@@ -195,6 +216,7 @@ export interface PersonalPostDraft {
 	sourceEvidence: string[];
 	reviewChecklist: VantaReviewChecklistItem[];
 	proofBoundary: VantaProofBoundary;
+	algorithmFit: VantaAlgorithmFit;
 }
 
 export interface VantaReplyPrompt {
@@ -210,6 +232,7 @@ export interface VantaReplyPrompt {
 	whyItMatters: string;
 	sourceEvidence: string[];
 	reviewChecklist: VantaReviewChecklistItem[];
+	algorithmFit: VantaAlgorithmFit;
 }
 
 export interface VantaVoiceBridgePair {
@@ -231,6 +254,7 @@ export interface VantaContentPlan {
 	personalPostDrafts: PersonalPostDraft[];
 	voiceBridgePairs: VantaVoiceBridgePair[];
 	replyPrompts: VantaReplyPrompt[];
+	engagementTargets: VantaEngagementTarget[];
 	safetyNote: string;
 	safetyNotes: string[];
 }
@@ -337,7 +361,14 @@ function sourceEvidenceFor(signal: TopicSignal | undefined, fallback: string) {
 	return [
 		sourceSignalFor(signal, fallback),
 		`sample: ${safeEvidence(signal.sampleText)}`,
-	];
+		typeof signal.score === "number"
+			? `quality-adjusted score: ${signal.score}`
+			: undefined,
+		...(signal.qualityNotes ?? []),
+		typeof signal.noiseMentions === "number" && signal.noiseMentions > 0
+			? `${signal.noiseMentions} low-quality mention${signal.noiseMentions === 1 ? "" : "s"} downranked`
+			: undefined,
+	].filter((item): item is string => Boolean(item));
 }
 
 function priorityFromScore(score: number): VantaContentPriority {
@@ -348,6 +379,9 @@ function priorityFromScore(score: number): VantaContentPriority {
 
 function topicScore(signal: TopicSignal | undefined) {
 	if (!signal) return 6;
+	if (typeof signal.score === "number") {
+		return Math.min(100, Math.max(0, signal.score));
+	}
 	return Math.min(
 		100,
 		signal.personalMentions * 3 + signal.projectMentions * 2,
@@ -546,11 +580,15 @@ export function buildVantaVoiceBridgePairs({
 function topSignals(analytics: AnalyticsResponse) {
 	return analytics.topicSignals
 		.slice()
-		.sort(
-			(left, right) =>
+		.sort((left, right) => {
+			const hasScoredSignal =
+				typeof left.score === "number" || typeof right.score === "number";
+			return (
+				(hasScoredSignal ? topicScore(right) - topicScore(left) : 0) ||
 				right.personalMentions - left.personalMentions ||
-				right.projectMentions - left.projectMentions,
-		)
+				right.projectMentions - left.projectMentions
+			);
+		})
 		.slice(0, 3);
 }
 
@@ -577,6 +615,142 @@ function isSpammyOpportunity(item: ProjectOpportunityItem) {
 			text,
 		) && item.likeCount === 0
 	);
+}
+
+function formatFollowers(value: number) {
+	if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+	if (value >= 1_000) return `${Math.round(value / 100) / 10}k`;
+	return String(value);
+}
+
+function nicheForText(value: string) {
+	if (/agent|x402|api|wallet|permission/i.test(value))
+		return "agent wallets and paid APIs";
+	if (/merchant|settlement|invoice|receipt|payment/i.test(value))
+		return "merchant settlement and receipts";
+	if (/privacy|private|proof|disclos/i.test(value))
+		return "privacy and proof boundaries";
+	if (/solana|stablecoin/i.test(value)) return "Solana stablecoin ops";
+	return "crypto operators and product builders";
+}
+
+function targetFromOpportunity(
+	item: ProjectOpportunityItem,
+): VantaEngagementTarget {
+	const text = `${item.text} ${item.reason} ${item.author.bio}`;
+	const score = Math.min(
+		100,
+		12 + item.likeCount * 3 + Math.floor(item.author.followersCount / 1200),
+	);
+	return {
+		handle: item.author.handle,
+		displayName: item.author.displayName,
+		niche: nicheForText(text),
+		score,
+		reason: item.reason,
+		evidence: `${item.likeCount} likes; ${formatFollowers(item.author.followersCount)} followers; "${safeEvidence(item.text)}"`,
+		nextAction: `Reply to @${item.author.handle} only after source review; use their question as the proof-boundary prompt.`,
+	};
+}
+
+function targetFromSharedAudience(
+	item: SharedAudienceItem,
+): VantaEngagementTarget {
+	const totalMentions = item.projectMentions + item.personalMentions;
+	const score = Math.min(
+		100,
+		totalMentions * 9 + Math.floor(item.profile.followersCount / 1800),
+	);
+	return {
+		handle: item.profile.handle,
+		displayName: item.profile.displayName,
+		niche: nicheForText(`${item.profile.bio} ${item.profile.displayName}`),
+		score,
+		reason: "Warm overlap across personal and project account signal",
+		evidence: `${item.projectMentions} project mentions; ${item.personalMentions} personal mentions; ${formatFollowers(item.profile.followersCount)} followers`,
+		nextAction: `Use @${item.profile.handle} as a warm-reader check before broad posting.`,
+	};
+}
+
+function buildEngagementTargets(
+	analytics: AnalyticsResponse,
+): VantaEngagementTarget[] {
+	const targets = [
+		...analytics.projectOpportunities
+			.filter((item) => !isSpammyOpportunity(item))
+			.map(targetFromOpportunity),
+		...analytics.sharedAudience.map(targetFromSharedAudience),
+	];
+	const byHandle = new Map<string, VantaEngagementTarget>();
+	for (const target of targets) {
+		const key = target.handle.toLowerCase();
+		const existing = byHandle.get(key);
+		if (!existing || target.score > existing.score) {
+			byHandle.set(key, target);
+		}
+	}
+	return [...byHandle.values()]
+		.sort((left, right) => right.score - left.score)
+		.slice(0, 6);
+}
+
+function bestTargetSummary(analytics: AnalyticsResponse) {
+	const target = buildEngagementTargets(analytics)[0];
+	if (!target) return "warm crypto/privacy operators in Clay's local graph";
+	return `@${target.handle} and nearby ${target.niche}`;
+}
+
+function rankingSignalForGoal(goal: EngagementGoal) {
+	const signals = {
+		bookmark:
+			"save-worthy utility: checklists, field maps, and reusable receipt language",
+		like: "clean agreement payoff without requiring Vanta context",
+		proof:
+			"artifact dwell: screenshot, receipt, or proof lane gives people something inspectable",
+		reply: "reply probability: one clear edge people can argue or clarify",
+		share:
+			"repost/quote probability: a compressed contradiction that travels without a thread",
+	} as const;
+	return signals[goal];
+}
+
+function algorithmFitForDraft({
+	accountLane,
+	analytics,
+	artifactNeeded,
+	engagementGoal,
+	tension,
+}: {
+	accountLane: "project" | "personal" | "reply";
+	analytics: AnalyticsResponse;
+	artifactNeeded?: string;
+	engagementGoal: EngagementGoal;
+	tension: string;
+}): VantaAlgorithmFit {
+	const targetReader = bestTargetSummary(analytics);
+	const candidatePath =
+		accountLane === "personal"
+			? "Personal scout lane: Clay's in-network taste plus topic-similar crypto/product builders."
+			: accountLane === "reply"
+				? "Conversation lane: answer an existing mention so the reply can earn its own home-timeline merit."
+				: "Project lane: warm overlap, social proof, and topic similarity around receipts, wallets, privacy, and agent payments.";
+	const artifactClause =
+		artifactNeeded && artifactNeeded !== "none"
+			? ` The missing artifact (${artifactNeeded}) should create the save/dwell reason.`
+			: "";
+	const normalHumanWhy =
+		accountLane === "personal"
+			? "A normal reader should recognize the product failure before they need to know Vanta exists."
+			: "A normal reader should understand what happened, what can be checked, and what stays private.";
+	return {
+		candidatePath,
+		rankingSignal: rankingSignalForGoal(engagementGoal),
+		targetReader,
+		whyItCanTravel: `It has a visible tension (${tension}) and a concrete noun surface instead of abstract crypto positioning.${artifactClause}`,
+		normalHumanWhy,
+		source:
+			"Birdclaw heuristic based on X's public recommendation architecture: candidate sourcing, engagement-probability ranking, social proof, filtering, and author diversity.",
+	};
 }
 
 function buildPillars(analytics: AnalyticsResponse): VantaContentPillar[] {
@@ -637,7 +811,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 		{
 			id: "vanta-draft-counterparty-privacy",
 			archetype: "control-surface thesis",
-			body: "private settlement should be public enough to verify and private enough to operate. the receipt is the lane.",
+			body: "private settlement needs one public surface: the receipt. enough to verify, not enough to leak the workflow.",
 			sourceSignal,
 			score: Math.max(primaryScore, 20),
 			nextAction: "Review and queue manually",
@@ -654,7 +828,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 		{
 			id: "vanta-draft-solana-merchant",
 			archetype: "personal-interest bridge",
-			body: "every refund story eventually asks the same boring question: what happened, who approved it, and what can be proven?",
+			body: "the part after the refund drama is the product: who approved it, what changed, what can be proven, what stays out of view.",
 			sourceSignal,
 			score: primaryScore,
 			nextAction: "Review and queue manually",
@@ -666,6 +840,27 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			replyEdge: "Builders can argue what belongs in the receipt.",
 			artifactNeeded: "refund or receipt anatomy screenshot",
 			sourceEvidence,
+		},
+		{
+			id: "vanta-draft-launch-recovery",
+			archetype: "launch recovery path",
+			body: "launches need more than attention. they need receipts, status, and recovery paths that still make sense after the thread is gone.",
+			sourceSignal:
+				"Forty-loop CT taste pass: launch/refund attention only becomes useful when it turns into durable status and recovery evidence.",
+			score: Math.max(primaryScore - 1, 24),
+			nextAction: "Pair with launch/refund status map",
+			whyItMatters:
+				"Turns launch culture into a normal-human recovery story instead of promotion or pile-on commentary.",
+			engagementGoal: "bookmark" as const,
+			engagementPattern: "current_event_reframe" as const,
+			tension: "attention spike vs recoverable status",
+			replyEdge:
+				"Founders and operators can argue what a launch needs after the thread stops moving.",
+			artifactNeeded: "launch/refund status map",
+			sourceEvidence: [
+				"Current CT loop: refund and launch ambiguity travel, but the durable Vanta lane is status, proof, and recovery.",
+				"Product adaptation: show who approved what, what changed, what can be verified, and what remains private.",
+			],
 		},
 		{
 			id: "vanta-draft-agent-permissions",
@@ -687,7 +882,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 		{
 			id: "vanta-draft-agent-payment-policy",
 			archetype: "x402 policy surface",
-			body: "agent payments turn every API into a checkout. that means every agent needs a spending policy.",
+			body: "when every API becomes a checkout, the missing UI is policy: amount, route, purpose, expiry, revocation, receipt.",
 			sourceSignal:
 				"Forty-loop CT taste pass: x402, MPP, and agent payments are current, but the missing layer is policy and receipt clarity.",
 			score: 24,
@@ -729,7 +924,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 		{
 			id: "vanta-draft-merchant-metadata",
 			archetype: "merchant metadata privacy",
-			body: "merchant metadata privacy is not about hiding that a payment happened. it is about not broadcasting the invoice, customer context, payout reason, and internal note with it.",
+			body: "merchant privacy is usually metadata privacy. the payment can be visible while the invoice id, customer context, payout reason, and internal note stay out of the broadcast.",
 			sourceSignal:
 				"Project loops: merchant metadata privacy is the strongest new lane because it makes privacy operational instead of abstract.",
 			score: 27,
@@ -886,6 +1081,13 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 				id: draft.id,
 			}),
 			reviewChecklist: reviewChecklistFor(text),
+			algorithmFit: algorithmFitForDraft({
+				accountLane: "project",
+				analytics,
+				artifactNeeded: draft.artifactNeeded,
+				engagementGoal: draft.engagementGoal,
+				tension: draft.tension,
+			}),
 		};
 	});
 }
@@ -959,7 +1161,7 @@ function buildPersonalPostDrafts(
 		{
 			id: "personal-draft-launch-receipt",
 			archetype: "launch culture read",
-			body: "every new crypto launch has two products: the thing and the explanation of why it is not a rug.",
+			body: "launch culture is mostly a stress test for whether the explanation can survive the chart.",
 			sourceSignal:
 				"Forty-loop personal taste pass: Bags-style launch culture is alive, but the durable angle is ambiguity, reputation, and receipts.",
 			score: Math.max(score - 1, 20),
@@ -1117,6 +1319,13 @@ function buildPersonalPostDrafts(
 				{ label: "Fits X character limit", passed: text.length <= 280 },
 				{ label: "Source text treated as untrusted", passed: true },
 			],
+			algorithmFit: algorithmFitForDraft({
+				accountLane: "personal",
+				analytics,
+				artifactNeeded: draft.artifactNeeded,
+				engagementGoal: draft.engagementGoal,
+				tension: draft.tension,
+			}),
 		};
 	});
 }
@@ -1156,6 +1365,12 @@ function buildReplyPrompts(analytics: AnalyticsResponse): VantaReplyPrompt[] {
 						passed: suggestedReply.length <= 280,
 					},
 				],
+				algorithmFit: algorithmFitForDraft({
+					accountLane: "reply",
+					analytics,
+					engagementGoal: "reply",
+					tension: "source question vs proof-boundary answer",
+				}),
 			};
 		});
 }
@@ -1165,6 +1380,7 @@ export function buildVantaContentPlan(
 ): VantaContentPlan {
 	const postDrafts = buildPostDrafts(analytics);
 	const personalPostDrafts = buildPersonalPostDrafts(analytics);
+	const engagementTargets = buildEngagementTargets(analytics);
 	return {
 		manualPostingOnly: true,
 		guardrails: VANTA_CONTENT_GUARDRAILS,
@@ -1178,6 +1394,7 @@ export function buildVantaContentPlan(
 			postDrafts,
 		}),
 		replyPrompts: buildReplyPrompts(analytics),
+		engagementTargets,
 		safetyNote:
 			"Manual review required before any public post or reply. Keep Vanta beta, merchant-first, receipt-backed, and counterparty-useful privacy.",
 		safetyNotes: [

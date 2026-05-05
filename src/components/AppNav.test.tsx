@@ -43,7 +43,7 @@ describe("AppNav", () => {
 			"aria-current",
 			"page",
 		);
-		expect(screen.getByRole("link", { name: "Studio" })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: "Today" })).toHaveAttribute(
 			"href",
 			"/content",
 		);

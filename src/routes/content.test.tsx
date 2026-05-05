@@ -177,6 +177,20 @@ describe("content route", () => {
 										{ label: "Fits X character limit", passed: true },
 										{ label: "Keeps beta-truth framing", passed: true },
 									],
+									algorithmFit: {
+										candidatePath:
+											"Project lane: warm overlap and topic similarity around receipts.",
+										rankingSignal:
+											"repost/quote probability: compressed proof-boundary language",
+										targetReader:
+											"@merchant and nearby merchant settlement operators",
+										whyItCanTravel:
+											"It has a visible tension and a concrete receipt surface.",
+										normalHumanWhy:
+											"A normal reader understands what happened and what can be checked.",
+										source:
+											"Birdclaw heuristic based on X's public recommendation architecture.",
+									},
 								},
 							],
 							personalPostDrafts: [
@@ -202,6 +216,19 @@ describe("content route", () => {
 										{ label: "Manual posting only", passed: true },
 										{ label: "No financial advice", passed: true },
 									],
+									algorithmFit: {
+										candidatePath:
+											"Personal scout lane: Clay's taste plus topic-similar builders.",
+										rankingSignal: "reply probability: one sharp product edge",
+										targetReader:
+											"@merchant and nearby merchant settlement operators",
+										whyItCanTravel:
+											"It names the scoreboard tension before the product mechanism.",
+										normalHumanWhy:
+											"A normal reader recognizes the product failure first.",
+										source:
+											"Birdclaw heuristic based on X's public recommendation architecture.",
+									},
 								},
 							],
 							replyPrompts: [
@@ -213,6 +240,32 @@ describe("content route", () => {
 									prompt: "Draft a short reply.",
 									suggestedReply:
 										"Yes, the useful loop is a clear approval plus a receipt.",
+									algorithmFit: {
+										candidatePath:
+											"Conversation lane: answer an existing mention.",
+										rankingSignal:
+											"reply probability: one clear edge people can clarify",
+										targetReader:
+											"@merchant and nearby merchant settlement operators",
+										whyItCanTravel:
+											"It turns the source question into a proof-boundary answer.",
+										normalHumanWhy:
+											"A normal reader can tell what the approval and receipt are for.",
+										source:
+											"Birdclaw heuristic based on X's public recommendation architecture.",
+									},
+								},
+							],
+							engagementTargets: [
+								{
+									handle: "merchant",
+									displayName: "Merchant Desk",
+									niche: "merchant settlement and receipts",
+									score: 37,
+									reason: "Question or confusion worth answering publicly",
+									evidence: "6 likes; 4.2k followers; receipt question",
+									nextAction:
+										"Reply only after source review; use the question as the proof-boundary prompt.",
 								},
 							],
 							safetyNote:
@@ -233,7 +286,7 @@ describe("content route", () => {
 
 		expect(
 			await screen.findByText(
-				"Turn timeline signal into safer posts worth publishing",
+				"What to post next, who it is for, and why it can travel",
 			),
 		).toBeInTheDocument();
 		expect(
@@ -266,7 +319,7 @@ describe("content route", () => {
 			"aria-pressed",
 			"false",
 		);
-		expect(screen.getByText("Next manual move")).toBeInTheDocument();
+		expect(screen.getByText("Today pick")).toBeInTheDocument();
 		expect(screen.getByText("Best move today")).toBeInTheDocument();
 		expect(screen.getByText("Check before copy")).toBeInTheDocument();
 		expect(screen.getByText("Can prove")).toBeInTheDocument();
@@ -295,6 +348,11 @@ describe("content route", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("Recommended manual action")).toBeInTheDocument();
 		expect(screen.getByText("Decision brief")).toBeInTheDocument();
+		expect(screen.getByText("Algorithm fit")).toBeInTheDocument();
+		expect(screen.getByText("Candidate path")).toBeInTheDocument();
+		expect(screen.getByText("Ranking signal")).toBeInTheDocument();
+		expect(screen.getByText("Normal-human read")).toBeInTheDocument();
+		expect(screen.getByText(/Actual engaged target:/)).toBeInTheDocument();
 		expect(screen.getByText("Artifact before copy")).toBeInTheDocument();
 		expect(screen.getByText("Proof boundary")).toBeInTheDocument();
 		expect(
@@ -407,6 +465,8 @@ describe("content route", () => {
 		expect(
 			screen.getByText("Why these topics are worth using"),
 		).toBeInTheDocument();
+		expect(screen.getByText("Actual engaged people")).toBeInTheDocument();
+		expect(screen.getAllByText("@merchant").length).toBeGreaterThan(0);
 		expect(
 			screen.getByText("@williamclay showed 4 personal Privacy signals."),
 		).toBeInTheDocument();
@@ -668,7 +728,7 @@ describe("content route", () => {
 
 		expect(
 			await screen.findByText(
-				"Turn timeline signal into safer posts worth publishing",
+				"What to post next, who it is for, and why it can travel",
 			),
 		).toBeInTheDocument();
 		expect(

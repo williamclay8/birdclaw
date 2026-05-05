@@ -11,13 +11,13 @@ import {
 import { ThemeSlider } from "./ThemeSlider";
 
 const links = [
+	{ to: "/content", label: "Today" },
 	{ to: "/inbox", label: "Inbox" },
 	{ to: "/", label: "Home" },
-	{ to: "/content", label: "Studio" },
 	{ to: "/mentions", label: "Mentions" },
+	{ to: "/dms", label: "DMs" },
 	{ to: "/likes", label: "Likes" },
 	{ to: "/bookmarks", label: "Bookmarks" },
-	{ to: "/dms", label: "DMs" },
 	{ to: "/blocks", label: "Blocks" },
 ] as const;
 

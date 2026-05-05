@@ -12,17 +12,48 @@ const PROJECT_HANDLE = "@vantaprivacy";
 const PERSONAL_HANDLE = "@williamclay";
 
 const topicMatchers = [
-	{ topic: "Privacy", pattern: /privacy|private|surveillance|sovereignty/i },
-	{ topic: "Solana", pattern: /solana|\$vanta|bags|bagsapp/i },
 	{
-		topic: "Collaboration",
-		pattern: /collab|partner|proposal|dm me|talk in dm/i,
+		topic: "Agent Payments",
+		pattern:
+			/agent|x402|api checkout|paid api|wallet|permission|spend|policy|revocation/i,
+		weight: 5,
+	},
+	{
+		topic: "Receipts",
+		pattern: /receipt|verify|verified|proof|trust packet|settle|settlement/i,
+		weight: 5,
+	},
+	{
+		topic: "Merchant Metadata",
+		pattern: /merchant|invoice|customer context|payout|metadata|internal note/i,
+		weight: 5,
+	},
+	{
+		topic: "Recovery",
+		pattern: /refund|retry|failed|failure|recover|recovery|status|approved/i,
+		weight: 4,
+	},
+	{
+		topic: "Solana Stablecoins",
+		pattern: /solana|stablecoin|\$vanta|bags|bagsapp/i,
+		weight: 4,
+	},
+	{
+		topic: "Privacy Proof",
+		pattern:
+			/privacy|private|selective disclosure|disclosure|surveillance|sovereignty/i,
+		weight: 4,
 	},
 	{
 		topic: "Launch Feedback",
-		pattern: /progress|production|live|status|trust/i,
+		pattern: /launch|progress|beta|live|trust|reputation/i,
+		weight: 3,
 	},
-	{ topic: "Security", pattern: /security|custody|self custody|hardened/i },
+	{
+		topic: "Security Boundaries",
+		pattern: /security|custody|self custody|signing key|key boundary|hardened/i,
+		weight: 3,
+	},
 ] as const;
 
 function roleForHandle(handle: string): AccountAnalyticsSummary["role"] {
@@ -123,14 +154,55 @@ function getSharedAudience(): SharedAudienceItem[] {
 	}));
 }
 
+function isLowQualitySignalText(value: string) {
+	return /follow back|dm me|send me dm|shoot dm|project growth|pump your project|promo|collab|partnership|airdrop|whitelist|100x|rocket|fire/i.test(
+		value,
+	);
+}
+
+function topicQualityNotes({
+	noiseMentions,
+	projectMentions,
+	personalMentions,
+	score,
+}: {
+	noiseMentions: number;
+	personalMentions: number;
+	projectMentions: number;
+	score: number;
+}) {
+	const notes = [
+		"Quality-adjusted score favors specific receipts, permissions, metadata, recovery, and merchant-ops language.",
+	];
+	if (personalMentions > 0 && projectMentions > 0) {
+		notes.push(
+			"Both Clay's scout account and Vanta's project lane touched it.",
+		);
+	}
+	if (noiseMentions > 0) {
+		notes.push(
+			`Downranked ${noiseMentions} low-quality collaboration, promo, or followback signal${noiseMentions === 1 ? "" : "s"}.`,
+		);
+	}
+	if (score >= 30) {
+		notes.push("Strong enough to outrank broad topic heat.");
+	}
+	return notes;
+}
+
 function getTopicSignals(): TopicSignal[] {
 	const db = getNativeDb();
 	const rows = db
 		.prepare(
 			`
-      select a.handle as account_handle, t.text
+      select
+        a.handle as account_handle,
+        t.text,
+        t.like_count,
+        coalesce(p.followers_count, 0) as followers_count
       from tweets t
       join accounts a on a.id = t.account_id
+      left join profiles p on p.id = t.author_profile_id
       where t.kind = 'mention'
         and lower(a.handle) in (?, ?)
       order by t.created_at desc
@@ -140,27 +212,61 @@ function getTopicSignals(): TopicSignal[] {
 		.all(PROJECT_HANDLE, PERSONAL_HANDLE) as Array<Record<string, unknown>>;
 
 	return topicMatchers
-		.map(({ topic, pattern }) => {
+		.map(({ topic, pattern, weight }) => {
 			const matches = rows.filter((row) => pattern.test(String(row.text)));
-			const projectMentions = matches.filter(
+			const usefulMatches = matches.filter(
+				(row) => !isLowQualitySignalText(String(row.text)),
+			);
+			const projectMentions = usefulMatches.filter(
 				(row) => String(row.account_handle).toLowerCase() === PROJECT_HANDLE,
 			).length;
-			const personalMentions = matches.filter(
+			const personalMentions = usefulMatches.filter(
 				(row) => String(row.account_handle).toLowerCase() === PERSONAL_HANDLE,
 			).length;
+			const noiseMentions = matches.length - usefulMatches.length;
+			const score = Math.max(
+				0,
+				Math.round(
+					usefulMatches.reduce((total, row) => {
+						const accountWeight =
+							String(row.account_handle).toLowerCase() === PERSONAL_HANDLE
+								? 5
+								: 4;
+						const likeWeight = Math.min(8, Number(row.like_count) || 0);
+						const audienceWeight = Math.min(
+							10,
+							Math.floor((Number(row.followers_count) || 0) / 1500),
+						);
+						return total + weight + accountWeight + likeWeight + audienceWeight;
+					}, 0) -
+						noiseMentions * 5,
+				),
+			);
 			return {
 				topic,
 				projectMentions,
 				personalMentions,
-				sampleText: String(matches[0]?.text ?? ""),
+				sampleText: String(usefulMatches[0]?.text ?? matches[0]?.text ?? ""),
+				score,
+				noiseMentions,
+				qualityNotes: topicQualityNotes({
+					noiseMentions,
+					projectMentions,
+					personalMentions,
+					score,
+				}),
 			};
 		})
-		.filter((signal) => signal.projectMentions + signal.personalMentions > 0)
+		.filter(
+			(signal) =>
+				signal.projectMentions + signal.personalMentions > 0 &&
+				(signal.score ?? 0) > 0,
+		)
 		.sort(
 			(left, right) =>
-				right.projectMentions +
-				right.personalMentions -
-				(left.projectMentions + left.personalMentions),
+				(right.score ?? 0) - (left.score ?? 0) ||
+				right.personalMentions - left.personalMentions ||
+				right.projectMentions - left.projectMentions,
 		);
 }
 

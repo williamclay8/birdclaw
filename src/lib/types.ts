@@ -269,6 +269,9 @@ export interface TopicSignal {
 	projectMentions: number;
 	personalMentions: number;
 	sampleText: string;
+	score?: number;
+	noiseMentions?: number;
+	qualityNotes?: string[];
 }
 
 export interface ProjectOpportunityItem {

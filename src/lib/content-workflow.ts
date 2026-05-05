@@ -11,6 +11,7 @@ import type {
 	VantaProofBoundary,
 	VantaContentPriority,
 	VantaReviewChecklistItem,
+	VantaAlgorithmFit,
 } from "./vanta-content-workflow";
 export type {
 	VantaContentPillar as ProjectContentPillar,
@@ -41,9 +42,80 @@ export interface PersonalPostDraft {
 	whyItMatters: string;
 	reviewChecklist: VantaReviewChecklistItem[];
 	proofBoundary: VantaProofBoundary;
+	algorithmFit: VantaAlgorithmFit;
 }
 
-function buildPersonalPostDrafts(): PersonalPostDraft[] {
+function nicheForAnalytics(analytics: AnalyticsResponse) {
+	const firstWarmTarget =
+		analytics.sharedAudience[0]?.profile.handle ??
+		analytics.projectOpportunities[0]?.author.handle;
+	if (firstWarmTarget) {
+		return `@${firstWarmTarget} and nearby crypto operators`;
+	}
+	return "warm crypto/privacy operators in Clay's local graph";
+}
+
+function algorithmFitForPersonalDraft({
+	analytics,
+	artifactNeeded,
+	engagementGoal,
+	tension,
+}: {
+	analytics: AnalyticsResponse;
+	artifactNeeded: string;
+	engagementGoal: EngagementGoal;
+	tension: string;
+}): VantaAlgorithmFit {
+	const rankingSignals = {
+		bookmark:
+			"save-worthy utility: checklists, field maps, and reusable product tests",
+		like: "clean agreement payoff without requiring Vanta context",
+		proof:
+			"artifact dwell: screenshot or workflow proof gives people something inspectable",
+		reply:
+			"reply probability: one sharp product edge people can argue or clarify",
+		share:
+			"repost/quote probability: a compressed mechanism that travels without a thread",
+	} as const;
+	const artifactClause =
+		artifactNeeded !== "none"
+			? ` The missing artifact (${artifactNeeded}) should create the save/dwell reason.`
+			: "";
+
+	return {
+		candidatePath:
+			"Personal scout lane: Clay's in-network taste plus topic-similar crypto/product builders.",
+		rankingSignal: rankingSignals[engagementGoal],
+		targetReader: nicheForAnalytics(analytics),
+		whyItCanTravel: `It names a visible tension (${tension}) before it asks anyone to care about Vanta.${artifactClause}`,
+		normalHumanWhy:
+			"A normal reader should recognize the product failure before they need to know Vanta exists.",
+		source:
+			"Birdclaw heuristic based on X's public recommendation architecture: candidate sourcing, engagement-probability ranking, social proof, filtering, and author diversity.",
+	};
+}
+
+function algorithmFitForProjectNote(
+	analytics: AnalyticsResponse,
+): VantaAlgorithmFit {
+	return {
+		candidatePath:
+			"Project lane: warm overlap, social proof, and topic similarity around receipts, beta limits, and operator-verifiable proof.",
+		rankingSignal:
+			"repost/quote probability: a clear beta-truth standard that travels without a long thread",
+		targetReader: nicheForAnalytics(analytics),
+		whyItCanTravel:
+			"It compresses the product boundary into proof-backed, operator-verifiable, explicit limits.",
+		normalHumanWhy:
+			"A normal reader should understand what is ready to inspect and what is still a beta limit.",
+		source:
+			"Birdclaw heuristic based on X's public recommendation architecture: candidate sourcing, engagement-probability ranking, social proof, filtering, and author diversity.",
+	};
+}
+
+function buildPersonalPostDrafts(
+	analytics: AnalyticsResponse,
+): PersonalPostDraft[] {
 	const drafts = [
 		{
 			id: "personal-draft-agent-permissions",
@@ -102,7 +174,7 @@ function buildPersonalPostDrafts(): PersonalPostDraft[] {
 		{
 			id: "personal-draft-launch-receipt",
 			archetype: "launch culture read",
-			body: "every new crypto launch has two products: the thing and the explanation of why it is not a rug.",
+			body: "launch culture is mostly a stress test for whether the explanation can survive the chart.",
 			engagementGoal: "reply",
 			engagementPattern: "personal_observation",
 			tension: "distribution speed vs trust explanation",
@@ -255,12 +327,18 @@ function buildPersonalPostDrafts(): PersonalPostDraft[] {
 			{ label: "No X write action from Birdclaw", passed: true },
 			{ label: "Fits X character limit", passed: draft.body.length <= 280 },
 		],
+		algorithmFit: algorithmFitForPersonalDraft({
+			analytics,
+			artifactNeeded: draft.artifactNeeded,
+			engagementGoal: draft.engagementGoal,
+			tension: draft.tension,
+		}),
 	}));
 }
 
 export function buildProjectContentWorkflow(analytics: AnalyticsResponse) {
 	const plan = buildVantaContentPlan(analytics);
-	const personalPostDrafts = buildPersonalPostDrafts();
+	const personalPostDrafts = buildPersonalPostDrafts(analytics);
 	const postDrafts = [
 		...plan.postDrafts,
 		{
@@ -293,6 +371,7 @@ export function buildProjectContentWorkflow(analytics: AnalyticsResponse) {
 				{ label: "Fits X character limit", passed: true },
 				{ label: "Keeps beta-truth framing", passed: true },
 			],
+			algorithmFit: algorithmFitForProjectNote(analytics),
 		},
 	];
 	return {
