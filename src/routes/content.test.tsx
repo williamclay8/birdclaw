@@ -293,6 +293,7 @@ describe("content route", () => {
 									body: "Private settlement needs receipts people can verify.",
 									text: "Private settlement needs receipts people can verify.",
 									sourceSignal: "Topic signal: Solana privacy.",
+									sourceTier: "local_db_signal",
 									approvedToPost: false,
 									priority: "high",
 									score: 30,
@@ -334,6 +335,7 @@ describe("content route", () => {
 									body: "current CT is good at the scoreboard and bad at the operating system underneath it.",
 									text: "current CT is good at the scoreboard and bad at the operating system underneath it.",
 									sourceSignal: "Fresh For You engagement snapshot.",
+									sourceTier: "cached_voice_memo",
 									approvedToPost: false,
 									engagementGoal: "reply",
 									engagementPattern: "personal_observation",
@@ -505,6 +507,11 @@ describe("content route", () => {
 		expect(screen.getByText("Normal-human read")).toBeInTheDocument();
 		expect(screen.getByText(/Actual engaged target:/)).toBeInTheDocument();
 		expect(screen.getByText("Artifact before copy")).toBeInTheDocument();
+		expect(screen.getAllByText("Source tier").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Local DB signal").length).toBeGreaterThan(0);
+		expect(
+			screen.getAllByText("Source tier: Local DB signal").length,
+		).toBeGreaterThan(0);
 		expect(screen.getByText("Proof boundary")).toBeInTheDocument();
 		expect(
 			screen.getByText("Prove enough; hide excess; keep beta limits visible"),

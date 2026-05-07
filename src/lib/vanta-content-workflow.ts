@@ -131,6 +131,14 @@ export type EngagementPattern =
 	| "contradiction"
 	| "artifact_caption"
 	| "personal_observation";
+export type VantaSourceTier =
+	| "local_db_signal"
+	| "cached_voice_memo"
+	| "static_vanta_doctrine";
+
+const LOCAL_DB_SIGNAL: VantaSourceTier = "local_db_signal";
+const CACHED_VOICE_MEMO: VantaSourceTier = "cached_voice_memo";
+const STATIC_VANTA_DOCTRINE: VantaSourceTier = "static_vanta_doctrine";
 
 export interface VantaReviewChecklistItem {
 	label: string;
@@ -218,6 +226,7 @@ export interface VantaContentPillar {
 	topic: string;
 	angle: string;
 	sourceSignal: string;
+	sourceTier: VantaSourceTier;
 	priority: VantaContentPriority;
 	score: number;
 	nextAction: string;
@@ -231,6 +240,7 @@ export interface VantaPostDraft {
 	body: string;
 	text: string;
 	sourceSignal: string;
+	sourceTier: VantaSourceTier;
 	approvedToPost: boolean;
 	priority: VantaContentPriority;
 	score: number;
@@ -253,6 +263,7 @@ export interface PersonalPostDraft {
 	body: string;
 	text: string;
 	sourceSignal: string;
+	sourceTier: VantaSourceTier;
 	approvedToPost: boolean;
 	priority: VantaContentPriority;
 	score: number;
@@ -276,6 +287,7 @@ export interface VantaReplyPrompt {
 	authorHandle: string;
 	prompt: string;
 	suggestedReply: string;
+	sourceTier: VantaSourceTier;
 	priority: VantaContentPriority;
 	score: number;
 	nextAction: string;
@@ -1310,6 +1322,7 @@ function buildPillars(analytics: AnalyticsResponse): VantaContentPillar[] {
 			topic: safeTopic(signal.topic),
 			angle: template.angle,
 			sourceSignal: sourceSignalFor(signal, template.topic),
+			sourceTier: LOCAL_DB_SIGNAL,
 			priority: priorityFromScore(score),
 			score,
 			nextAction:
@@ -1331,6 +1344,7 @@ function buildPillars(analytics: AnalyticsResponse): VantaContentPillar[] {
 			topic: template.topic,
 			angle: template.angle,
 			sourceSignal: "Vanta voice contract and distribution ethos.",
+			sourceTier: STATIC_VANTA_DOCTRINE,
 			priority: "low",
 			score: 6,
 			nextAction: "Hold as fallback lane",
@@ -1354,12 +1368,16 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 		"Personal interests are being routed into project-account positioning.",
 	);
 	const primaryScore = topicScore(signals[0]);
+	const primarySourceTier: VantaSourceTier = signals[0]
+		? LOCAL_DB_SIGNAL
+		: STATIC_VANTA_DOCTRINE;
 	const drafts = [
 		{
 			id: "vanta-draft-counterparty-privacy",
 			archetype: "control-surface thesis",
 			body: "private settlement needs one public surface: the receipt. enough to verify, not enough to leak the workflow.",
 			sourceSignal,
+			sourceTier: primarySourceTier,
 			score: Math.max(primaryScore, 20),
 			nextAction: "Review and queue manually",
 			whyItMatters:
@@ -1377,6 +1395,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			archetype: "personal-interest bridge",
 			body: "the part after the refund drama is the product: who approved it, what changed, what can be proven, what stays out of view.",
 			sourceSignal,
+			sourceTier: primarySourceTier,
 			score: primaryScore,
 			nextAction: "Review and queue manually",
 			whyItMatters:
@@ -1394,6 +1413,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "launches need more than attention. they need receipts, status, and recovery paths that still make sense after the thread is gone.",
 			sourceSignal:
 				"Forty-loop CT taste pass: launch/refund attention only becomes useful when it turns into durable status and recovery evidence.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(primaryScore - 1, 24),
 			nextAction: "Pair with launch/refund status map",
 			whyItMatters:
@@ -1414,6 +1434,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			archetype: "agent-permission critique",
 			body: "the question is no longer whether agents can touch wallets. it is what they were allowed to touch.",
 			sourceSignal: "Vanta voice contract: agent-safe control surfaces.",
+			sourceTier: STATIC_VANTA_DOCTRINE,
 			score: 26,
 			nextAction: "Review and queue manually",
 			whyItMatters:
@@ -1432,6 +1453,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "when every API becomes a checkout, the missing UI is policy: amount, route, purpose, expiry, revocation, receipt.",
 			sourceSignal:
 				"Forty-loop CT taste pass: x402, MPP, and agent payments are current, but the missing layer is policy and receipt clarity.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 24,
 			nextAction: "Pair with an agent spend-limit screenshot",
 			whyItMatters:
@@ -1453,6 +1475,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "a useful private payment receipt answers three questions: what happened, what can be verified, and what stays private.",
 			sourceSignal:
 				"Forty-loop CT taste pass: proof artifacts and receipt anatomy are the most durable Vanta project-account lane.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 25,
 			nextAction: "Build a marked-up receipt/trust-packet screenshot",
 			whyItMatters:
@@ -1474,6 +1497,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "merchant privacy is usually metadata privacy. the payment can be visible while the invoice id, customer context, payout reason, and internal note stay out of the broadcast.",
 			sourceSignal:
 				"Project loops: merchant metadata privacy is the strongest new lane because it makes privacy operational instead of abstract.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 27,
 			nextAction: "Pair with a redacted receipt field map",
 			whyItMatters:
@@ -1495,6 +1519,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "an agent spend limit should read like a policy, not a vibe: max amount, allowed route, purpose, expiry, revocation, receipt.",
 			sourceSignal:
 				"Project loops: agent payments are moving from autonomy demos to readable policy, limit, and receipt surfaces.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 26,
 			nextAction: "Pair with a spend-policy config screenshot",
 			whyItMatters:
@@ -1515,6 +1540,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "agent payments do not just move money. they also describe what the agent wanted, where it went, and why the request existed.",
 			sourceSignal:
 				"May 2 current-reference pass: x402 turns paid API calls into a live agent-payment rail, but request metadata becomes part of the trust and leak surface.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 28,
 			nextAction: "Pair with an agent-payment metadata field map",
 			whyItMatters:
@@ -1536,6 +1562,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "paid API calls need two receipts: the offer the server committed to, and the service the client actually received.",
 			sourceSignal:
 				"May 2 current-reference pass: x402 signed offers and receipts make proof-of-interaction concrete for agent payments.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 27,
 			nextAction: "Pair with an offer/receipt boundary field map",
 			whyItMatters:
@@ -1558,6 +1585,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "the key that signs a receipt should be a boundary, not a shortcut. keep payment collection, offer terms, and delivery proof separate.",
 			sourceSignal:
 				"May 2 current-reference pass: x402 signed offers and receipts make the signing key a visible trust boundary, separate from payment collection.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 26,
 			nextAction: "Pair with a signing-key/payment-address boundary checklist",
 			whyItMatters:
@@ -1579,6 +1607,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "recovery is part of the payment surface. if a wallet can approve, spend, or settle, it should also explain what failed and what can be retried.",
 			sourceSignal:
 				"Project loops: recovery is an underused Vanta lane for failed approvals, refund ambiguity, retries, and trust after errors.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 23,
 			nextAction: "Pair with a failed-approval or recovery-state screenshot",
 			whyItMatters:
@@ -1599,6 +1628,7 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			body: "proof is stronger when it has a boundary. this happened, this can be checked, this stays private, this is still beta.",
 			sourceSignal:
 				"Project loops: beta truth should be product discipline, not apology; every proof claim needs a visible boundary.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: 21,
 			nextAction: "Pair with a proof-boundary checklist",
 			whyItMatters:
@@ -1647,6 +1677,9 @@ function buildPersonalPostDrafts(
 		signals[0],
 		"Personal account should scout the timeline and turn live interest into useful market anthropology.",
 	);
+	const primarySourceTier: VantaSourceTier = signals[0]
+		? LOCAL_DB_SIGNAL
+		: CACHED_VOICE_MEMO;
 	const sourceEvidence = [
 		"Fresh @williamclay For You snapshot: comedy and controversy scaled when the hook was instantly legible.",
 		"AI failure, CT PVP, market headlines, Solana, launch/refund drama, and dev-culture posts recurred as live interest lanes.",
@@ -1659,6 +1692,7 @@ function buildPersonalPostDrafts(
 			archetype: "personal market anthropology",
 			body: "the agent wallet problem is not intelligence. it is blast radius.",
 			sourceSignal,
+			sourceTier: primarySourceTier,
 			score,
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1676,6 +1710,7 @@ function buildPersonalPostDrafts(
 			archetype: "CT pattern note",
 			body: "CT notices the scoreboard instantly. the operating system underneath it usually gets discussed three disasters later.",
 			sourceSignal,
+			sourceTier: primarySourceTier,
 			score: Math.max(score - 2, 18),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1693,6 +1728,7 @@ function buildPersonalPostDrafts(
 			archetype: "founder taste note",
 			body: "best founder taste right now is probably knowing which parts of the flow should stay manual.",
 			sourceSignal,
+			sourceTier: primarySourceTier,
 			score: Math.max(score - 4, 16),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1711,6 +1747,7 @@ function buildPersonalPostDrafts(
 			body: "launch culture is mostly a stress test for whether the explanation can survive the chart.",
 			sourceSignal:
 				"Forty-loop personal taste pass: Bags-style launch culture is alive, but the durable angle is ambiguity, reputation, and receipts.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 1, 20),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1732,6 +1769,7 @@ function buildPersonalPostDrafts(
 			body: "useful product test: if the screenshot goes viral, can a normal person tell what happened, who had permission, and what changed?",
 			sourceSignal:
 				"Forty-loop personal taste pass: bookmarkable posts are prompts, checklists, teardown formats, and compact operating principles.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 3, 19),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1752,6 +1790,7 @@ function buildPersonalPostDrafts(
 			body: "the weird thing about CT is that every panic is also an accidental product requirements doc.",
 			sourceSignal:
 				"Personal loops: start with the weird mechanism, not the moral; every blowup points to a missing control surface.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 2, 21),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1772,6 +1811,7 @@ function buildPersonalPostDrafts(
 			body: "i trust agent demos more when they show the permission screen before the magic.",
 			sourceSignal:
 				"Personal loops: agent-wallet discourse needs less awe and more permission, log, and blame mapping.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 1, 22),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1792,6 +1832,7 @@ function buildPersonalPostDrafts(
 			body: "a wallet flow is not done when the payment succeeds. it is done when the explanation survives a confused group chat.",
 			sourceSignal:
 				"Personal loops: wallet UX is now screenshot, confusion, receipt, and permission-history UX.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 2, 21),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1812,6 +1853,7 @@ function buildPersonalPostDrafts(
 			body: "the best agent workflows feel less like delegation and more like a very fast intern with a very small debit card.",
 			sourceSignal:
 				"Personal loops: manual review and narrow spend limits are becoming premium workflow language.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 3, 20),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1831,6 +1873,7 @@ function buildPersonalPostDrafts(
 			body: "the weird part of agent payments is that the payment is often less sensitive than the reason the agent made it.",
 			sourceSignal:
 				"Current x402/agent-payment read: metadata and reason strings are becoming the interesting leak surface.",
+			sourceTier: CACHED_VOICE_MEMO,
 			score: Math.max(score - 1, 22),
 			nextAction: "Review for @williamclay",
 			whyItMatters:
@@ -1895,6 +1938,7 @@ function buildReplyPrompts(analytics: AnalyticsResponse): VantaReplyPrompt[] {
 				authorHandle: item.author.handle,
 				prompt: `Draft a short @vantaprivacy reply to @${item.author.handle}: ${item.reason}`,
 				suggestedReply,
+				sourceTier: LOCAL_DB_SIGNAL,
 				priority: priorityFromScore(score),
 				score,
 				nextAction: "Review reply and respond manually",

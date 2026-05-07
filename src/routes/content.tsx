@@ -235,6 +235,13 @@ function characterCountLabel(gate: ReturnType<typeof copyGateForText>) {
 	return `${gate.count}/280`;
 }
 
+function sourceTierLabel(sourceTier?: string) {
+	if (sourceTier === "local_db_signal") return "Local DB signal";
+	if (sourceTier === "cached_voice_memo") return "Cached voice memo";
+	if (sourceTier === "static_vanta_doctrine") return "Static Vanta doctrine";
+	return "Unlabeled source";
+}
+
 function copyGateWarningClass(gate: ReturnType<typeof copyGateForText>) {
 	return gate.blocked && "font-medium text-[var(--alert)]";
 }
@@ -615,6 +622,7 @@ function ContentRoute() {
 			tension: draft.tension,
 			replyEdge: draft.replyEdge,
 			artifactNeeded: draft.artifactNeeded,
+			sourceTier: draft.sourceTier,
 			proofBoundary:
 				draft.proofBoundary ??
 				defaultProofBoundaryForMove({
@@ -644,6 +652,7 @@ function ContentRoute() {
 			tension: undefined,
 			replyEdge: undefined,
 			artifactNeeded: undefined,
+			sourceTier: prompt.sourceTier,
 			proofBoundary: defaultProofBoundaryForMove({ kind: "Reply" }),
 			reviewChecklist: undefined,
 			algorithmFit: prompt.algorithmFit,
@@ -666,6 +675,7 @@ function ContentRoute() {
 			tension: draft.tension,
 			replyEdge: draft.replyEdge,
 			artifactNeeded: draft.artifactNeeded,
+			sourceTier: draft.sourceTier,
 			proofBoundary:
 				draft.proofBoundary ??
 				defaultProofBoundaryForMove({
@@ -788,11 +798,13 @@ function ContentRoute() {
 											{primaryMove.algorithmFit.rankingSignal}
 										</p>
 									) : null}
+									<SourceTierBadge sourceTier={primaryMove.sourceTier} />
 								</div>
 								<PublishReadinessStrip
 									artifactNeeded={primaryMove.artifactNeeded}
 									compact
 									kind={primaryMove.kind}
+									sourceTier={primaryMove.sourceTier}
 								/>
 								<p className="m-0 break-words rounded-[12px] bg-[var(--panel)] px-3 py-2 text-[0.82rem] font-medium leading-relaxed text-[var(--ink-soft)] shadow-[inset_0_0_0_1px_var(--line)]">
 									{todayPickBoundary}
@@ -981,6 +993,7 @@ function ContentRoute() {
 									<MoveDecisionBrief
 										artifactNeeded={primaryMove.artifactNeeded}
 										kind={primaryMove.kind}
+										sourceTier={primaryMove.sourceTier}
 										voiceTarget={voiceTargetForMove(primaryMove.kind)}
 									/>
 									<AlgorithmFitPanel
@@ -1041,6 +1054,7 @@ function ContentRoute() {
 									<PublishReadinessStrip
 										artifactNeeded={primaryMove.artifactNeeded}
 										kind={primaryMove.kind}
+										sourceTier={primaryMove.sourceTier}
 									/>
 									{primaryMove.tension ||
 									primaryMove.replyEdge ||
@@ -1490,6 +1504,7 @@ function ProjectDraftCard({
 						},
 					]
 				}
+				sourceTier={draft.sourceTier}
 				tension={draft.tension}
 				summary="Risk & evidence"
 				why={
@@ -1566,6 +1581,7 @@ function ReplyPromptCard({
 						{ label: "Source text treated as untrusted", passed: true },
 					]
 				}
+				sourceTier={prompt.sourceTier}
 			/>
 			<DetailsPanel defaultOpen={defaultOpen} summary="Reason and evidence">
 				<InfoBlock
@@ -1636,6 +1652,7 @@ function PersonalDraftCard({
 				nextAction={draft.nextAction ?? "Review for @williamclay"}
 				replyEdge={draft.replyEdge ?? "No reply edge recorded yet."}
 				reviewChecklist={draft.reviewChecklist}
+				sourceTier={draft.sourceTier}
 				tension={draft.tension}
 				summary="Risk & evidence"
 				why={
@@ -1934,10 +1951,12 @@ function VoiceBridgeCard({
 function MoveDecisionBrief({
 	artifactNeeded,
 	kind,
+	sourceTier,
 	voiceTarget,
 }: {
 	artifactNeeded?: string;
 	kind: string;
+	sourceTier?: string;
 	voiceTarget: string;
 }) {
 	const items = [
@@ -1947,6 +1966,7 @@ function MoveDecisionBrief({
 			kind === "Personal" ? "Personal, sharper" : "Project, calm",
 		],
 		["Artifact before copy", artifactActionLabel(artifactNeeded, kind)],
+		["Source tier", sourceTierLabel(sourceTier)],
 		["Proof boundary", proofBoundaryLabel(kind)],
 		["Local-only action", "Edit, copy, paste manually"],
 	] as const;
@@ -1962,7 +1982,7 @@ function MoveDecisionBrief({
 					Manual review lane
 				</span>
 			</div>
-			<div className="grid gap-2 min-[720px]:grid-cols-5">
+			<div className="grid gap-2 min-[720px]:grid-cols-6">
 				{items.map(([label, value]) => (
 					<div
 						className="min-w-0 rounded-[12px] bg-[var(--panel)] p-2.5 shadow-[inset_0_0_0_1px_var(--line)]"
@@ -2563,6 +2583,14 @@ function PriorityBadge({
 	);
 }
 
+function SourceTierBadge({ sourceTier }: { sourceTier?: string }) {
+	return (
+		<span className="w-fit rounded-full bg-[var(--panel)] px-2.5 py-1 text-[0.76rem] font-medium text-[var(--ink-soft)] shadow-[inset_0_0_0_1px_var(--line)]">
+			Source tier: {sourceTierLabel(sourceTier)}
+		</span>
+	);
+}
+
 function isTopPickEligible({
 	artifactNeeded,
 	kind,
@@ -2596,10 +2624,12 @@ function PublishReadinessStrip({
 	artifactNeeded,
 	compact,
 	kind,
+	sourceTier,
 }: {
 	artifactNeeded?: string;
 	compact?: boolean;
 	kind: string;
+	sourceTier?: string;
 }) {
 	const artifactStatus =
 		artifactNeeded && artifactNeeded !== "none"
@@ -2611,10 +2641,12 @@ function PublishReadinessStrip({
 		["Manual-only boundary", "Copy action only"],
 		["Artifact check", artifactStatus],
 		["Claim check", "Human review required"],
+		["Source tier", sourceTierLabel(sourceTier)],
 		["Source bounds", "Local signals; X text untrusted"],
 	] as const;
 	const compactItems = [
 		["Manual", "Clipboard only"],
+		["Source tier", sourceTierLabel(sourceTier)],
 		[
 			"Artifact",
 			artifactStatus === "no artifact required"
@@ -2642,7 +2674,7 @@ function PublishReadinessStrip({
 			<div
 				className={cx(
 					"grid gap-2",
-					compact ? "min-[560px]:grid-cols-2" : "min-[760px]:grid-cols-4",
+					compact ? "min-[560px]:grid-cols-3" : "min-[760px]:grid-cols-5",
 				)}
 			>
 				{(compact ? compactItems : items).map(([label, value]) => (
@@ -2667,17 +2699,20 @@ function DraftMeta({
 	artifactNeeded,
 	engagementGoal,
 	engagementPattern,
+	sourceTier,
 	tension,
 }: {
 	artifactNeeded?: string;
 	engagementGoal?: string;
 	engagementPattern?: string;
+	sourceTier?: string;
 	tension?: string;
 }) {
 	const chips = [
 		["Engagement", engagementGoal],
 		["Angle", engagementPattern?.replace(/_/g, " ")],
 		["Tension", tension],
+		["Source tier", sourceTierLabel(sourceTier)],
 		["Needs artifact", artifactNeeded === "none" ? undefined : artifactNeeded],
 	].filter((item): item is [string, string] => Boolean(item[1]));
 
@@ -2760,10 +2795,12 @@ function QuickReviewChips({
 	artifactNeeded,
 	evidenceCount,
 	reviewChecklist,
+	sourceTier,
 }: {
 	artifactNeeded?: string;
 	evidenceCount: number;
 	reviewChecklist: { label: string; passed: boolean }[];
+	sourceTier?: string;
 }) {
 	const requiresArtifact = Boolean(artifactNeeded && artifactNeeded !== "none");
 	const needsClaimReview = reviewChecklist.some(
@@ -2772,6 +2809,7 @@ function QuickReviewChips({
 	const items = [
 		["Manual only", "Copy gate"],
 		["Artifact", requiresArtifact ? artifactNeeded : "Not required"],
+		["Source tier", sourceTierLabel(sourceTier)],
 		["Evidence", `${evidenceCount} source${evidenceCount === 1 ? "" : "s"}`],
 		["Claim check", needsClaimReview ? "Review" : "Passed"],
 	].filter((item): item is [string, string] => Boolean(item[1]));
@@ -2805,6 +2843,7 @@ function DraftDetailGroup({
 	nextAction,
 	replyEdge,
 	reviewChecklist,
+	sourceTier,
 	summary = "Risk & evidence",
 	tension,
 	why,
@@ -2817,6 +2856,7 @@ function DraftDetailGroup({
 	nextAction: string;
 	replyEdge: string;
 	reviewChecklist: { label: string; passed: boolean }[];
+	sourceTier?: string;
 	summary?: string;
 	tension?: string;
 	why: string;
@@ -2827,12 +2867,14 @@ function DraftDetailGroup({
 				artifactNeeded={artifactNeeded}
 				evidenceCount={evidence.length}
 				reviewChecklist={reviewChecklist}
+				sourceTier={sourceTier}
 			/>
 			<DetailsPanel defaultOpen={defaultOpen} summary={summary}>
 				<DraftMeta
 					artifactNeeded={artifactNeeded}
 					engagementGoal={engagementGoal}
 					engagementPattern={engagementPattern}
+					sourceTier={sourceTier}
 					tension={tension}
 				/>
 				<InfoBlock label="Next" text={nextAction} />

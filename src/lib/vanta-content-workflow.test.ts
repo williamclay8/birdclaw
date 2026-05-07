@@ -129,6 +129,18 @@ describe("Vanta content workflow", () => {
 				sourceOpportunityId: "tweet_1",
 			}),
 		]);
+		expect(first.pillars[0]?.sourceTier).toBe("local_db_signal");
+		expect(
+			first.postDrafts.find(
+				(draft) => draft.id === "vanta-draft-agent-payment-metadata",
+			)?.sourceTier,
+		).toBe("cached_voice_memo");
+		expect(
+			first.postDrafts.find(
+				(draft) => draft.id === "vanta-draft-agent-permissions",
+			)?.sourceTier,
+		).toBe("static_vanta_doctrine");
+		expect(first.replyPrompts[0]?.sourceTier).toBe("local_db_signal");
 		expect(first.engagementTargets).toEqual([
 			expect.objectContaining({
 				handle: "merchantdesk",

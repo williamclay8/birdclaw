@@ -13,6 +13,7 @@ import type {
 	VantaContentPriority,
 	VantaReviewChecklistItem,
 	VantaAlgorithmFit,
+	VantaSourceTier,
 } from "./vanta-content-workflow";
 export type {
 	VantaContentPillar as ProjectContentPillar,
@@ -30,6 +31,7 @@ export interface PersonalPostDraft {
 	body: string;
 	text: string;
 	sourceSignal: string;
+	sourceTier: VantaSourceTier;
 	sourceEvidence: string[];
 	approvedToPost: false;
 	engagementGoal: EngagementGoal;
@@ -305,6 +307,7 @@ function buildPersonalPostDrafts(
 		text: draft.body,
 		sourceSignal:
 			"Read-only @williamclay For You engagement snapshot and personal-account interest map.",
+		sourceTier: "cached_voice_memo",
 		sourceEvidence: [
 			VANTA_CT_ENGAGEMENT_PLAYBOOK.source,
 			VANTA_CT_ENGAGEMENT_PLAYBOOK.personalUse[
@@ -348,6 +351,7 @@ export function buildProjectContentWorkflow(analytics: AnalyticsResponse) {
 			body: "Vanta is beta today. The useful standard is simple: proof-backed where implemented, operator-verifiable where exposed, and explicit about current limits.",
 			text: "Vanta is beta today. The useful standard is simple: proof-backed where implemented, operator-verifiable where exposed, and explicit about current limits.",
 			sourceSignal: "Vanta beta-truth and no-overclaiming guardrail.",
+			sourceTier: "static_vanta_doctrine",
 			approvedToPost: false,
 			priority: "medium" as const,
 			score: 14,
