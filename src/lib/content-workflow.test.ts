@@ -131,7 +131,16 @@ describe("buildProjectContentWorkflow", () => {
 		expect(new Set(workflow.postDrafts.map((draft) => draft.id)).size).toBe(
 			workflow.postDrafts.length,
 		);
+		expect(
+			workflow.postDrafts.find((draft) => draft.id === "vanta-draft-beta-truth")
+				?.sourceTier,
+		).toBe("static_vanta_doctrine");
 		expect(workflow.personalPostDrafts).toHaveLength(13);
+		expect(
+			workflow.personalPostDrafts.find(
+				(draft) => draft.id === "personal-draft-agent-permissions",
+			)?.sourceTier,
+		).toBe("cached_voice_memo");
 		expect(workflow.personalPostDrafts).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({

@@ -236,7 +236,7 @@ function characterCountLabel(gate: ReturnType<typeof copyGateForText>) {
 }
 
 function sourceTierLabel(sourceTier?: string) {
-	if (sourceTier === "local_db_signal") return "Local DB signal";
+	if (sourceTier === "local_db_signal") return "Local mention signal";
 	if (sourceTier === "cached_voice_memo") return "Cached voice memo";
 	if (sourceTier === "static_vanta_doctrine") return "Static Vanta doctrine";
 	return "Unlabeled source";
@@ -798,13 +798,11 @@ function ContentRoute() {
 											{primaryMove.algorithmFit.rankingSignal}
 										</p>
 									) : null}
-									<SourceTierBadge sourceTier={primaryMove.sourceTier} />
 								</div>
 								<PublishReadinessStrip
 									artifactNeeded={primaryMove.artifactNeeded}
 									compact
 									kind={primaryMove.kind}
-									sourceTier={primaryMove.sourceTier}
 								/>
 								<p className="m-0 break-words rounded-[12px] bg-[var(--panel)] px-3 py-2 text-[0.82rem] font-medium leading-relaxed text-[var(--ink-soft)] shadow-[inset_0_0_0_1px_var(--line)]">
 									{todayPickBoundary}
@@ -2583,14 +2581,6 @@ function PriorityBadge({
 	);
 }
 
-function SourceTierBadge({ sourceTier }: { sourceTier?: string }) {
-	return (
-		<span className="w-fit rounded-full bg-[var(--panel)] px-2.5 py-1 text-[0.76rem] font-medium text-[var(--ink-soft)] shadow-[inset_0_0_0_1px_var(--line)]">
-			Source tier: {sourceTierLabel(sourceTier)}
-		</span>
-	);
-}
-
 function isTopPickEligible({
 	artifactNeeded,
 	kind,
@@ -2646,7 +2636,6 @@ function PublishReadinessStrip({
 	] as const;
 	const compactItems = [
 		["Manual", "Clipboard only"],
-		["Source tier", sourceTierLabel(sourceTier)],
 		[
 			"Artifact",
 			artifactStatus === "no artifact required"
@@ -2674,7 +2663,7 @@ function PublishReadinessStrip({
 			<div
 				className={cx(
 					"grid gap-2",
-					compact ? "min-[560px]:grid-cols-3" : "min-[760px]:grid-cols-5",
+					compact ? "min-[560px]:grid-cols-2" : "min-[760px]:grid-cols-5",
 				)}
 			>
 				{(compact ? compactItems : items).map(([label, value]) => (

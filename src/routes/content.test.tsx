@@ -54,6 +54,7 @@ function createOverLimitReplyFetchMock() {
 							authorHandle: "merchant",
 							prompt: "Long reply fixture.",
 							suggestedReply: "x".repeat(281),
+							sourceTier: "local_db_signal",
 							priority: "high",
 							score: 25,
 							nextAction: "Review reply manually",
@@ -508,10 +509,12 @@ describe("content route", () => {
 		expect(screen.getByText(/Actual engaged target:/)).toBeInTheDocument();
 		expect(screen.getByText("Artifact before copy")).toBeInTheDocument();
 		expect(screen.getAllByText("Source tier").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("Local DB signal").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Local mention signal").length).toBeGreaterThan(
+			0,
+		);
 		expect(
-			screen.getAllByText("Source tier: Local DB signal").length,
-		).toBeGreaterThan(0);
+			screen.queryByText("Source tier: Local mention signal"),
+		).not.toBeInTheDocument();
 		expect(screen.getByText("Proof boundary")).toBeInTheDocument();
 		expect(
 			screen.getByText("Prove enough; hide excess; keep beta limits visible"),
@@ -963,6 +966,7 @@ function createUnsafeQueueFetchMock() {
 							body: "Vanta is production-ready.",
 							text: "Vanta is production-ready.",
 							sourceSignal: "Fixture signal.",
+							sourceTier: "static_vanta_doctrine",
 							approvedToPost: false,
 							priority: "high",
 							score: 30,
@@ -987,6 +991,7 @@ function createUnsafeQueueFetchMock() {
 							body: "Vanta is anonymous.",
 							text: "Vanta is anonymous.",
 							sourceSignal: "Fixture signal.",
+							sourceTier: "cached_voice_memo",
 							approvedToPost: false,
 							engagementGoal: "reply",
 							engagementPattern: "personal_observation",
@@ -1012,6 +1017,7 @@ function createUnsafeQueueFetchMock() {
 							authorHandle: "merchant",
 							prompt: "Unsafe reply fixture.",
 							suggestedReply: "Vanta provides guaranteed privacy.",
+							sourceTier: "local_db_signal",
 							priority: "high",
 							score: 25,
 							nextAction: "Review reply manually",
@@ -1068,6 +1074,7 @@ function createContentFetchMock() {
 							topic: "Privacy",
 							angle: "Verify enough without seeing everything.",
 							sourceSignal: "@williamclay showed 4 personal Privacy signals.",
+							sourceTier: "local_db_signal",
 						},
 					],
 					postDrafts: [
@@ -1077,6 +1084,7 @@ function createContentFetchMock() {
 							body: "Private settlement needs receipts people can verify.",
 							text: "Private settlement needs receipts people can verify.",
 							sourceSignal: "Topic signal: Solana privacy.",
+							sourceTier: "local_db_signal",
 							approvedToPost: false,
 							engagementGoal: "share",
 							engagementPattern: "contradiction",
@@ -1099,6 +1107,7 @@ function createContentFetchMock() {
 							body: "current CT is good at the scoreboard and bad at the operating system underneath it.",
 							text: "current CT is good at the scoreboard and bad at the operating system underneath it.",
 							sourceSignal: "Fresh For You engagement snapshot.",
+							sourceTier: "cached_voice_memo",
 							approvedToPost: false,
 							engagementGoal: "reply",
 							engagementPattern: "personal_observation",
@@ -1126,6 +1135,7 @@ function createContentFetchMock() {
 							prompt: "Draft a short reply.",
 							suggestedReply:
 								"Yes, the useful loop is a clear approval plus a receipt.",
+							sourceTier: "local_db_signal",
 						},
 					],
 					safetyNote: "Manual review required before any public post or reply.",
