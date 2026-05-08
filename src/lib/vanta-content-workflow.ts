@@ -515,6 +515,17 @@ function proofBoundaryForDraft({
 				"signing key boundary guidance; not a custody or security guarantee",
 		};
 	}
+	if (id === "vanta-draft-pay-sh-credential-boundary") {
+		return {
+			canProve:
+				"paid authorization, live rate, quota, rate limit, provider, and receipt can be checked as the access-control surface",
+			staysPrivate:
+				"request purpose, business context, and private note stay local unless explicitly disclosed",
+			missingArtifact: "Pay.sh access-control field map",
+			betaLimit:
+				"payment-as-credential guidance only; Vanta remains beta and manually reviewed",
+		};
+	}
 	if (artifactNeeded && artifactNeeded !== "none") {
 		return {
 			canProve: `${artifactNeeded} can back the public claim`,
@@ -589,6 +600,17 @@ export function buildVantaVoiceBridgePairs({
 		artifactNeeded: "agent-payment metadata field map",
 	});
 	addPair({
+		personalDraftId: "personal-draft-payment-credential",
+		projectDraftId: "vanta-draft-pay-sh-credential-boundary",
+		scoutMechanism:
+			"payment is the credential, so the interesting product surface is access control",
+		projectTranslation:
+			"turn wallet identity, live rate, quota, rate limit, provider reconciliation, and receipt into a project-safe field map",
+		proofBoundary:
+			"access credential proves paid authorization; rate limits and receipt are reviewable; private request context stays local",
+		artifactNeeded: "Pay.sh access-control field map",
+	});
+	addPair({
 		personalDraftId: "personal-draft-offer-receipt-boundary",
 		projectDraftId: "vanta-draft-x402-offer-receipt",
 		scoutMechanism:
@@ -609,17 +631,6 @@ export function buildVantaVoiceBridgePairs({
 		proofBoundary:
 			"signing key proves the receipt boundary; payment address collects funds; custody and security claims stay out",
 		artifactNeeded: "signing-key/payment-address boundary checklist",
-	});
-	addPair({
-		personalDraftId: "personal-draft-payment-credential",
-		projectDraftId: "vanta-draft-pay-sh-credential-boundary",
-		scoutMechanism:
-			"payment is the credential, so the interesting product surface is access control",
-		projectTranslation:
-			"turn wallet identity, live rate, quota, rate limit, provider reconciliation, and receipt into a project-safe field map",
-		proofBoundary:
-			"access credential proves paid authorization; rate limits and receipt are reviewable; private request context stays local",
-		artifactNeeded: "Pay.sh access-control field map",
 	});
 	addPair({
 		personalDraftId: "personal-draft-wallet-group-chat",
@@ -1547,6 +1558,28 @@ function buildPostDrafts(analytics: AnalyticsResponse): VantaPostDraft[] {
 			],
 		},
 		{
+			id: "vanta-draft-pay-sh-credential-boundary",
+			archetype: "Pay.sh access-control boundary",
+			body: "when payment becomes the API credential, the receipt needs access context too: wallet identity, live rate, quota, rate limit, provider, result.",
+			sourceSignal:
+				"May 8 payment-as-credential pass: Pay.sh and x402 make the payment itself an access-control event, not only a settlement event.",
+			sourceTier: CACHED_VOICE_MEMO,
+			score: 29,
+			nextAction: "Pair with a Pay.sh access-control field map",
+			whyItMatters:
+				"Turns the current Pay.sh lane into a counterparty-useful receipt/access map instead of launch cheerleading.",
+			engagementGoal: "bookmark" as const,
+			engagementPattern: "compressed_take" as const,
+			tension: "payment proof vs access-control context",
+			replyEdge:
+				"Agent and API builders can argue which access-control fields belong in the receipt.",
+			artifactNeeded: "Pay.sh access-control field map",
+			sourceEvidence: [
+				"May 8 payment-as-credential loop: payment as credential shifts the useful surface to wallet identity, live rate, quota, rate limit, provider, result.",
+				"Vanta adaptation: treat payment proof, access policy, receipt, and private request purpose as separate fields.",
+			],
+		},
+		{
 			id: "vanta-draft-agent-payment-metadata",
 			archetype: "agent payment metadata",
 			body: "agent payments do not just move money. they also describe what the agent wanted, where it went, and why the request existed.",
@@ -1877,6 +1910,27 @@ function buildPersonalPostDrafts(
 			artifactNeeded: "agent workflow screenshot",
 			sourceEvidence: [
 				"Personal loops: never let agent autonomy sound costless; keep permission and review in the frame.",
+			],
+		},
+		{
+			id: "personal-draft-payment-credential",
+			archetype: "payment-as-credential read",
+			body: "the weird part of pay-per-request APIs is that the payment becomes the credential.",
+			sourceSignal:
+				"May 8 personal scout loop: Pay.sh turns paid API access into a credential, not just a small payment.",
+			sourceTier: CACHED_VOICE_MEMO,
+			score: Math.max(score - 1, 22),
+			nextAction: "Review for @williamclay",
+			whyItMatters:
+				"Turns the Pay.sh lane into a concise personal-account mechanism read without making Vanta claims.",
+			engagementGoal: "reply" as const,
+			engagementPattern: "personal_observation" as const,
+			tension: "payment as credential vs payment as checkout",
+			replyEdge:
+				"Agent and API builders can argue what the credential should reveal.",
+			artifactNeeded: "none",
+			sourceEvidence: [
+				"Current personal loop: the useful agent-payment observation is access control, not payment novelty.",
 			],
 		},
 		{

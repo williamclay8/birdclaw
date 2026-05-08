@@ -357,8 +357,7 @@ function buildPersonalPostDrafts(
 export function buildProjectContentWorkflow(analytics: AnalyticsResponse) {
 	const plan = buildVantaContentPlan(analytics);
 	const personalPostDrafts = buildPersonalPostDrafts(analytics);
-	const postDrafts = [
-		...plan.postDrafts,
+	const supplementalPostDrafts = [
 		{
 			id: "vanta-draft-beta-truth",
 			archetype: "truth-first build note",
@@ -447,6 +446,15 @@ export function buildProjectContentWorkflow(analytics: AnalyticsResponse) {
 					"Birdclaw heuristic based on X's public recommendation architecture and May 2026 public Pay.sh/x402 references.",
 			},
 		},
+	];
+	const supplementalPostDraftIds = new Set(
+		supplementalPostDrafts.map((draft) => draft.id),
+	);
+	const postDrafts = [
+		...plan.postDrafts.filter(
+			(draft) => !supplementalPostDraftIds.has(draft.id),
+		),
+		...supplementalPostDrafts,
 	];
 	const voiceBridgePairs = buildVantaVoiceBridgePairs({
 		personalPostDrafts,

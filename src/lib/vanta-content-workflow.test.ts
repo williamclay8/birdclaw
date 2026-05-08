@@ -246,6 +246,54 @@ describe("Vanta content workflow", () => {
 				]),
 			}),
 		);
+		expect(
+			plan.postDrafts.find(
+				(draft) => draft.id === "vanta-draft-pay-sh-credential-boundary",
+			),
+		).toEqual(
+			expect.objectContaining({
+				engagementGoal: "bookmark",
+				engagementPattern: "compressed_take",
+				artifactNeeded: "Pay.sh access-control field map",
+				proofBoundary: expect.objectContaining({
+					canProve: expect.stringContaining("paid authorization"),
+					staysPrivate: expect.stringContaining("request purpose"),
+					missingArtifact: "Pay.sh access-control field map",
+					betaLimit: expect.stringContaining("beta"),
+				}),
+				replyEdge: expect.stringContaining("access-control"),
+				sourceEvidence: expect.arrayContaining([
+					expect.stringContaining("payment as credential"),
+				]),
+			}),
+		);
+		expect(
+			plan.personalPostDrafts.find(
+				(draft) => draft.id === "personal-draft-payment-credential",
+			),
+		).toEqual(
+			expect.objectContaining({
+				artifactNeeded: "none",
+				engagementGoal: "reply",
+				tension: expect.stringContaining("credential"),
+			}),
+		);
+		expect(plan.voiceBridgePairs).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					personalDraftId: "personal-draft-payment-credential",
+					projectDraftId: "vanta-draft-pay-sh-credential-boundary",
+					artifactNeeded: "Pay.sh access-control field map",
+				}),
+			]),
+		);
+		expect(plan.voiceBridgePairs.slice(0, 3)).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					projectDraftId: "vanta-draft-pay-sh-credential-boundary",
+				}),
+			]),
+		);
 		expect(offerReceiptDraft).toEqual(
 			expect.objectContaining({
 				engagementGoal: "bookmark",
