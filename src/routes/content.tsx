@@ -42,6 +42,7 @@ const VOICE_LOOP_DIGEST = [
 	"Every strong claim needs a boundary: what happened, what can be checked, what stays private.",
 	"Agent-payment posts should name the metadata surface, not only the payment rail.",
 	"Receipt posts should separate signing authority from payment collection.",
+	"Payment-as-credential posts should name access control: wallet identity, rate, quota, limit, provider, receipt.",
 ] as const;
 
 function accountFilterLabel(value: AccountFilter) {

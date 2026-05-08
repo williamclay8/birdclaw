@@ -135,7 +135,7 @@ describe("buildProjectContentWorkflow", () => {
 			workflow.postDrafts.find((draft) => draft.id === "vanta-draft-beta-truth")
 				?.sourceTier,
 		).toBe("static_vanta_doctrine");
-		expect(workflow.personalPostDrafts).toHaveLength(13);
+		expect(workflow.personalPostDrafts).toHaveLength(14);
 		expect(
 			workflow.personalPostDrafts.find(
 				(draft) => draft.id === "personal-draft-agent-permissions",
@@ -201,6 +201,12 @@ describe("buildProjectContentWorkflow", () => {
 					tension: expect.stringContaining("signing authority"),
 					replyEdge: expect.stringContaining("signing authority"),
 				}),
+				expect.objectContaining({
+					archetype: "payment credential scout note",
+					engagementGoal: "bookmark",
+					tension: expect.stringContaining("credential"),
+					artifactNeeded: expect.stringContaining("Pay.sh"),
+				}),
 			]),
 		);
 		expect(workflow.voiceBridgePairs).toEqual(
@@ -228,6 +234,14 @@ describe("buildProjectContentWorkflow", () => {
 					projectTranslation: expect.stringContaining("signing authority"),
 					proofBoundary: expect.stringContaining("payment address"),
 					artifactNeeded: expect.stringContaining("signing-key"),
+				}),
+				expect.objectContaining({
+					personalDraftId: "personal-draft-payment-credential",
+					projectDraftId: "vanta-draft-pay-sh-credential-boundary",
+					scoutMechanism: expect.stringContaining("payment is the credential"),
+					projectTranslation: expect.stringContaining("rate limit"),
+					proofBoundary: expect.stringContaining("access credential"),
+					artifactNeeded: expect.stringContaining("Pay.sh"),
 				}),
 			]),
 		);
@@ -306,6 +320,12 @@ describe("buildProjectContentWorkflow", () => {
 					archetype: "recovery surface",
 					engagementGoal: "proof",
 					artifactNeeded: expect.stringContaining("recovery-state"),
+				}),
+				expect.objectContaining({
+					archetype: "payment credential boundary",
+					engagementGoal: "bookmark",
+					artifactNeeded: expect.stringContaining("Pay.sh"),
+					replyEdge: expect.stringContaining("credential"),
 				}),
 			]),
 		);

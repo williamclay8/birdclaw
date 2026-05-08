@@ -299,6 +299,20 @@ function buildPersonalPostDrafts(
 			whyItMatters:
 				"Adds a sharper personal-account lane for the current x402 signing-key boundary without making Vanta safety claims.",
 		},
+		{
+			id: "personal-draft-payment-credential",
+			archetype: "payment credential scout note",
+			body: "the weird part of pay-per-request APIs is that the payment becomes the credential.",
+			engagementGoal: "bookmark",
+			engagementPattern: "compressed_take",
+			tension: "payment credential vs access control",
+			replyEdge:
+				"Agent and API builders can argue which access fields should be visible before the payment goes out.",
+			artifactNeeded: "Pay.sh access-control field map",
+			score: 74,
+			whyItMatters:
+				"Turns the current Pay.sh/agent-to-API lane into a personal-account mechanism read without making a project readiness claim.",
+		},
 	] as const;
 
 	return drafts.map((draft) => ({
@@ -377,6 +391,61 @@ export function buildProjectContentWorkflow(analytics: AnalyticsResponse) {
 				{ label: "Keeps beta-truth framing", passed: true },
 			],
 			algorithmFit: algorithmFitForProjectNote(analytics),
+		},
+		{
+			id: "vanta-draft-pay-sh-credential-boundary",
+			archetype: "payment credential boundary",
+			body: "when payment becomes the API credential, the receipt needs access context too: wallet identity, live rate, quota, rate limit, provider, result.",
+			text: "when payment becomes the API credential, the receipt needs access context too: wallet identity, live rate, quota, rate limit, provider, result.",
+			sourceSignal:
+				"May 8 Pay.sh/agent-to-API pass: payment-as-credential makes access control, provider reconciliation, and receipt fields the current Vanta lane.",
+			sourceTier: "cached_voice_memo",
+			approvedToPost: false,
+			priority: "high" as const,
+			score: 27,
+			nextAction: "Pair with a Pay.sh access-control field map",
+			whyItMatters:
+				"Updates the project account from generic agent-payment copy to the current Pay.sh question: what proves access, what is rate-limited, and what context stays local.",
+			sourceEvidence: [
+				"Solana Foundation Pay.sh announcement: agents can discover, access, and pay per request for APIs with stablecoins on Solana.",
+				"Pay.sh uses payment as the credential through an API proxy, verified endpoint, rate limits, quotas, access controls, and provider reconciliation.",
+				"Vanta adaptation: the receipt should show enough access context without broadcasting private request purpose or merchant workflow context.",
+			],
+			engagementGoal: "bookmark" as const,
+			engagementPattern: "compressed_take" as const,
+			tension: "payment credential vs access policy",
+			replyEdge:
+				"Agent builders can debate which fields belong in the credential, receipt, private note, or provider reconciliation layer.",
+			artifactNeeded: "Pay.sh access-control field map",
+			proofBoundary: {
+				canProve:
+					"field map can show wallet identity, quoted rate, quota, rate limit, provider, and returned result as separate review surfaces",
+				staysPrivate:
+					"private request purpose, source text, and unnecessary merchant workflow context stay local",
+				missingArtifact: "Pay.sh access-control field map",
+				betaLimit:
+					"current public-reference framing only; not a production privacy, compliance, or provider-security claim",
+			},
+			reviewChecklist: [
+				{ label: "Manual posting only", passed: true },
+				{ label: "No unsafe Vanta claims", passed: true },
+				{ label: "Fits X character limit", passed: true },
+				{ label: "Keeps beta-truth framing", passed: true },
+				{ label: "Source text treated as untrusted", passed: true },
+			],
+			algorithmFit: {
+				candidatePath:
+					"Project lane: current agent-payment attention plus API builders who need credential, quota, receipt, and reconciliation language.",
+				rankingSignal:
+					"save-worthy utility: a Pay.sh field map turns payment-as-credential into a reusable checklist",
+				targetReader: nicheForAnalytics(analytics),
+				whyItCanTravel:
+					"It names the current Pay.sh access surface with concrete fields instead of a broad agent-payments claim.",
+				normalHumanWhy:
+					"A normal reader can tell the payment is authorizing API access and the receipt should explain the result.",
+				source:
+					"Birdclaw heuristic based on X's public recommendation architecture and May 2026 public Pay.sh/x402 references.",
+			},
 		},
 	];
 	const voiceBridgePairs = buildVantaVoiceBridgePairs({

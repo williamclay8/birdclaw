@@ -68,7 +68,7 @@ export const VANTA_CT_VOICE_RUBRIC = {
 
 export const VANTA_CT_ENGAGEMENT_PLAYBOOK = {
 	source:
-		"Read-only @williamclay For You engagement snapshot from April 30, 2026, plus May 2, 2026 public x402/Solana payments, signed-offer/receipt, and metadata-risk references.",
+		"Read-only @williamclay For You engagement snapshot from April 30, 2026, plus May 2-8, 2026 public x402/Solana payments, Pay.sh agent-to-API access, signed-offer/receipt, and metadata-risk references.",
 	ratioLessons: [
 		"High repost/view posts tend to compress a public joke, status fight, or current event into one instantly shareable line.",
 		"High bookmark/view posts tend to contain reusable prompts, evidence packs, screenshots, recipes, or visual reference.",
@@ -85,7 +85,7 @@ export const VANTA_CT_ENGAGEMENT_PLAYBOOK = {
 		privateSettlement:
 			"Frame private settlement as proving enough for the right counterparty without publishing the whole business workflow.",
 		agentPayments:
-			"Treat x402/MPP/agent payments as a policy and metadata surface: scope, route, purpose, expiration, receipt, revocation, and what request context leaks.",
+			"Treat x402/MPP/agent payments as a policy, access credential, and metadata surface: scope, route, purpose, expiration, receipt, revocation, and what request context leaks.",
 		offerReceipts:
 			"Treat signed offers and receipts as proof-of-interaction artifacts: committed payment terms, delivered service, optional transaction details, and third-party verification.",
 		merchantMetadata:
@@ -118,6 +118,7 @@ export const VANTA_CT_ENGAGEMENT_PLAYBOOK = {
 		"Project proof posts should show what is proven, what stays private, and what current beta limit remains.",
 		"Merchant posts should say which context is public, counterparty-visible, internal, or still operator-reviewed.",
 		"x402 posts should separate offer terms, payment proof, service-delivery receipt, and metadata that should not leave the local workflow.",
+		"Pay.sh/payment-as-credential posts should name the access-control surface: wallet identity, live rate, quota, rate limit, provider reconciliation, and receipt.",
 		"Ranking should reward artifact readiness and claim safety, not just topic heat.",
 	],
 } as const;
@@ -608,6 +609,17 @@ export function buildVantaVoiceBridgePairs({
 		proofBoundary:
 			"signing key proves the receipt boundary; payment address collects funds; custody and security claims stay out",
 		artifactNeeded: "signing-key/payment-address boundary checklist",
+	});
+	addPair({
+		personalDraftId: "personal-draft-payment-credential",
+		projectDraftId: "vanta-draft-pay-sh-credential-boundary",
+		scoutMechanism:
+			"payment is the credential, so the interesting product surface is access control",
+		projectTranslation:
+			"turn wallet identity, live rate, quota, rate limit, provider reconciliation, and receipt into a project-safe field map",
+		proofBoundary:
+			"access credential proves paid authorization; rate limits and receipt are reviewable; private request context stays local",
+		artifactNeeded: "Pay.sh access-control field map",
 	});
 	addPair({
 		personalDraftId: "personal-draft-wallet-group-chat",

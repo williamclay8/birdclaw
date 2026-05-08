@@ -104,6 +104,10 @@ describe("Vanta content workflow", () => {
 			}),
 		);
 		expect(first.engagementPlaybook.vantaUse.replyBait).toContain("limits");
+		expect(first.engagementPlaybook.source).toContain("Pay.sh");
+		expect(first.engagementPlaybook.vantaUse.agentPayments).toContain(
+			"access credential",
+		);
 		expect(first.pillars).toEqual([
 			expect.objectContaining({ title: "Counterparty-useful privacy" }),
 			expect.objectContaining({ title: "Proof-backed receipt loop" }),

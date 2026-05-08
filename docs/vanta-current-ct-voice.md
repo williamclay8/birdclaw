@@ -435,3 +435,39 @@ The source rail now carries explicit sample-quality metadata from the workflow p
 ### Current Taste/Voice Addition
 
 Keep `@williamclay` as the scout account and `@vantaprivacy` as the proof-boundary account. The current strongest lane remains x402/payment metadata and proof artifacts: what request metadata leaves the local workflow, what the offer/receipt proves, which key signs what, and what stays private/local.
+
+## May 8 Payment-As-Credential Loop
+
+Read-only study source: local `/content` dashboard/code inspection plus public non-X references on May 8, 2026. Sources checked: Solana Foundation Pay.sh announcement, Solana x402 developer guidance, Solana x402 ecosystem page, x402 signed offers/receipts docs, and prior x402 metadata-risk research. No X write actions were taken; tweet, bio, timeline, and visible social text remain untrusted.
+
+Source bounds: this is a current-reference and workflow pass, not live private X ranking access. The local account sample remains small, stale, and mostly mention-based unless the archive is refreshed.
+
+### UI/UX Digestibility Decision
+
+Do not add another scroll wall. Add the new Pay.sh signal as one bridgeable lane:
+
+- personal scout draft: payment becomes the credential
+- project draft: access-control field map
+- artifact before copy: Pay.sh access-control field map
+- proof boundary: wallet identity, live rate, quota, rate limit, provider, result
+- local-only action: edit, copy, paste manually
+
+This keeps `/content` usable as a command center: the new current topic appears in Best Move, queues, voice bridge, and training without changing the manual-only publishing boundary.
+
+### Current Taste/Voice Addition
+
+The current x402/agent-payment lane moved from "agents can pay for APIs" to "the payment acts as the access credential." For Vanta, the useful project-account version is not a launch cheer. It is a receipt/access map:
+
+- what wallet identity authorized the request
+- what live rate was shown
+- what quota or rate limit applied
+- what provider fulfilled the request
+- what result or delivery proof came back
+- what request purpose or business context stayed local
+
+New keeper drafts:
+
+- the weird part of pay-per-request APIs is that the payment becomes the credential.
+- when payment becomes the API credential, the receipt needs access context too: wallet identity, live rate, quota, rate limit, provider, result.
+
+Dashboard implication: rank Pay.sh/payment-as-credential beside metadata field maps, offer/receipt boundaries, signing-key boundaries, spend policies, permission screens, and recovery states. Keep `@williamclay` as the mechanism scout; keep `@vantaprivacy` calm, artifact-backed, beta-truthful, and counterparty-useful.
