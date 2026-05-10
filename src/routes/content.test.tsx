@@ -528,6 +528,14 @@ describe("content route", () => {
 		expect(screen.getByText("Required artifact")).toBeInTheDocument();
 		expect(screen.getByText("Copy gate")).toBeInTheDocument();
 		expect(screen.getByText("Distribution handoff")).toBeInTheDocument();
+		expect(screen.getByText("Artifact packet")).toBeInTheDocument();
+		expect(
+			screen.getByText("Fields to verify before copy"),
+		).toBeInTheDocument();
+		expect(screen.getByText("what happened")).toBeInTheDocument();
+		expect(screen.getByText("what can be checked")).toBeInTheDocument();
+		expect(screen.getByText("what stays local")).toBeInTheDocument();
+		expect(screen.getByText("beta or review limit")).toBeInTheDocument();
 		expect(
 			screen.getByText(/Scout read -> proof-safe project artifact/),
 		).toBeInTheDocument();

@@ -2447,6 +2447,11 @@ function ArtifactWorkbench({
 	const handoff = voicePair
 		? `Scout read -> proof-safe project artifact: ${voicePair.scoutMechanism} -> ${voicePair.projectTranslation}`
 		: "Scout read -> proof-safe project artifact";
+	const artifactPacket = artifactPacketFor({
+		artifact,
+		kind: move.kind,
+		voicePair,
+	});
 	const items = [
 		["Required artifact", artifact],
 		["Copy gate", gate.label === "ready" ? "Ready" : gate.label],
@@ -2479,12 +2484,123 @@ function ArtifactWorkbench({
 					</div>
 				))}
 			</div>
+			<div className="grid gap-2 rounded-[12px] bg-[var(--panel)] p-3 shadow-[inset_0_0_0_1px_var(--line)]">
+				<div className="flex flex-wrap items-center justify-between gap-2">
+					<p className="m-0 text-sm font-semibold text-[var(--ink)]">
+						Artifact packet
+					</p>
+					<span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[0.76rem] font-medium text-[var(--accent)]">
+						Fields to verify before copy
+					</span>
+				</div>
+				<div className="grid gap-2 min-[680px]:grid-cols-2">
+					{artifactPacket.map(([label, value]) => (
+						<div className="min-w-0" key={label}>
+							<p className="m-0 text-[0.72rem] font-medium uppercase tracking-[0.1em] text-[var(--ink-soft)]">
+								{label}
+							</p>
+							<p className="m-0 mt-1 break-words text-sm leading-snug text-[var(--ink)]">
+								{value}
+							</p>
+						</div>
+					))}
+				</div>
+			</div>
 			<p className="m-0 text-[0.88rem] leading-relaxed text-[var(--ink-soft)]">
 				Workbench status is local-only: gather evidence, inspect the boundary,
 				then copy manually if the gate allows it.
 			</p>
 		</section>
 	);
+}
+
+function artifactPacketFor({
+	artifact,
+	kind,
+	voicePair,
+}: {
+	artifact: string;
+	kind: string;
+	voicePair?: {
+		artifactNeeded: string;
+		proofBoundary: string;
+	};
+}) {
+	const normalized = artifact.toLowerCase();
+	const packetName =
+		artifact === "Not required" && kind === "Personal"
+			? "mechanism note"
+			: artifact === "Not required"
+				? "manual review note"
+				: artifact;
+	const base = [
+		["what happened", packetName],
+		["what can be checked", "counterparty-visible proof or source context"],
+		["what stays local", "source text and unnecessary business context"],
+		["beta or review limit", "manual review before public use"],
+	] as const;
+
+	if (/pay\.sh|access-control|credential|quota|rate limit/.test(normalized)) {
+		return [
+			["what happened", "payment authorized API access"],
+			[
+				"what can be checked",
+				"wallet identity, live rate, quota, provider, result",
+			],
+			["what stays local", "request purpose and private workflow context"],
+			[
+				"beta or review limit",
+				"credential framing only; not a provider-safety claim",
+			],
+		] as const;
+	}
+
+	if (/offer|receipt|signed/.test(normalized)) {
+		return [
+			["what happened", "offer terms and delivered service are separated"],
+			[
+				"what can be checked",
+				"server promise, payment proof, delivery receipt",
+			],
+			["what stays local", "private notes and nonessential request metadata"],
+			["beta or review limit", "proof-of-interaction framing only"],
+		] as const;
+	}
+
+	if (/metadata|field map/.test(normalized)) {
+		return [
+			["what happened", "request context entered the payment workflow"],
+			[
+				"what can be checked",
+				"public, counterparty-visible, and private fields",
+			],
+			["what stays local", "reason string, private note, source text"],
+			[
+				"beta or review limit",
+				"metadata policy guidance, not a privacy guarantee",
+			],
+		] as const;
+	}
+
+	if (/signing-key|signing key|payment-address/.test(normalized)) {
+		return [
+			["what happened", "receipt signing and payment collection are separate"],
+			["what can be checked", "signing authority, offer terms, delivery proof"],
+			["what stays local", "private note and unrelated custody context"],
+			["beta or review limit", "boundary guidance, not a security guarantee"],
+		] as const;
+	}
+
+	if (voicePair) {
+		return [
+			["what happened", voicePair.artifactNeeded],
+			["what can be checked", voicePair.proofBoundary],
+			["what stays local", "source text and private workflow context"],
+			["beta or review limit", "manual review before project translation"],
+		] as const;
+	}
+
+	return base;
 }
 
 function ProofBoundaryMatrix({
