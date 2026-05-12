@@ -285,11 +285,24 @@ export interface ProjectOpportunityItem {
 	reason: string;
 }
 
+export interface SourceBreakdownItem {
+	kind: "mention" | "home" | "like" | "bookmark";
+	count: number;
+	latestAt?: string;
+}
+
+export interface SourceBreakdown {
+	totalTweets: number;
+	latestTweetAt?: string;
+	kinds: SourceBreakdownItem[];
+}
+
 export interface AnalyticsResponse {
 	accounts: AccountAnalyticsSummary[];
 	sharedAudience: SharedAudienceItem[];
 	topicSignals: TopicSignal[];
 	projectOpportunities: ProjectOpportunityItem[];
+	sourceBreakdown?: SourceBreakdown;
 	recommendations: string[];
 }
 

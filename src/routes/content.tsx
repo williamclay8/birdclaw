@@ -25,6 +25,18 @@ type GoalFilter = "all" | "reply" | "bookmark" | "share" | "proof" | "like";
 type JobFilter = "all" | "artifact" | "copy" | "reply-review";
 type SectionDensity = "scan" | "full";
 type ContentFocus = "review" | "queues" | "voice" | "signals" | "training";
+type ContentEngineBridge = {
+	exportPath?: string;
+	importedPersonalDrafts?: number;
+	importedProjectDrafts?: number;
+	status?: string;
+};
+type ContentWorkflowWithBridge = ProjectContentWorkflow & {
+	contentEngineBridge?: ContentEngineBridge;
+};
+type AnalyticsSourceBreakdown = NonNullable<
+	AnalyticsResponse["sourceBreakdown"]
+>;
 
 const UI_LOOP_DIGEST = [
 	"Add a decision brief before evidence: job, voice split, artifact, manual gate.",
@@ -150,6 +162,45 @@ function sourceFreshnessAction(analytics: AnalyticsResponse | null) {
 	}
 
 	return "Source fresh enough for manual review";
+}
+
+function contentEngineBridgeSummary(bridge?: ContentEngineBridge) {
+	if (!bridge || bridge.status !== "loaded") {
+		return "No optional content-engine overlay loaded";
+	}
+	const exportName = bridge.exportPath?.split("/").pop() ?? "local export";
+	const projectCount = bridge.importedProjectDrafts ?? 0;
+	const personalCount = bridge.importedPersonalDrafts ?? 0;
+	return `Loaded ${projectCount} project and ${personalCount} personal draft${
+		projectCount + personalCount === 1 ? "" : "s"
+	} from ${exportName}`;
+}
+
+function sourceKindLabel(kind: string) {
+	if (kind === "mention") return "mentions";
+	if (kind === "home") return "home";
+	if (kind === "like") return "likes";
+	if (kind === "bookmark") return "bookmarks";
+	return kind;
+}
+
+function sourceBreakdownSummary(breakdown?: AnalyticsSourceBreakdown) {
+	if (!breakdown?.kinds.length) return "No source mix available";
+	return breakdown.kinds
+		.map((item) => `${sourceKindLabel(item.kind)} ${item.count}`)
+		.join("; ");
+}
+
+function sourceBreakdownFreshness(breakdown?: AnalyticsSourceBreakdown) {
+	if (!breakdown?.latestTweetAt) return "No source dates available";
+	const latestDate = breakdown.latestTweetAt.slice(0, 10);
+	const home = breakdown.kinds.find((item) => item.kind === "home");
+	const mention = breakdown.kinds.find((item) => item.kind === "mention");
+	const parts = [`latest ${latestDate}`];
+	if (mention?.latestAt)
+		parts.push(`mentions ${mention.latestAt.slice(0, 10)}`);
+	if (home?.latestAt) parts.push(`home ${home.latestAt.slice(0, 10)}`);
+	return parts.join("; ");
 }
 
 function contentFocusLabel(value: ContentFocus) {
@@ -421,7 +472,9 @@ function allAccountKindRank(kind: string) {
 
 function ContentRoute() {
 	const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
-	const [workflow, setWorkflow] = useState<ProjectContentWorkflow | null>(null);
+	const [workflow, setWorkflow] = useState<ContentWorkflowWithBridge | null>(
+		null,
+	);
 	const [copiedId, setCopiedId] = useState<string | null>(null);
 	const [copyStatus, setCopyStatus] = useState("");
 	const [accountFilter, setAccountFilter] = useState<AccountFilter>("all");
@@ -439,7 +492,7 @@ function ContentRoute() {
 			.then((data: AnalyticsResponse) => setAnalytics(data));
 		fetch("/api/content-workflow")
 			.then((response) => (response.ok ? response.json() : null))
-			.then((data: ProjectContentWorkflow) => setWorkflow(data));
+			.then((data: ContentWorkflowWithBridge) => setWorkflow(data));
 	}, []);
 
 	const counts = useMemo(() => {
@@ -896,9 +949,11 @@ function ContentRoute() {
 					</div>
 					<SourceBoundaryRail
 						age={sourceAge}
+						contentEngineBridge={workflow?.contentEngineBridge}
 						freshness={sourceFreshness}
 						quality={workflow?.sourceQuality?.summary}
 						source={workflow?.engagementPlaybook?.source}
+						sourceBreakdown={analytics?.sourceBreakdown}
 					/>
 					<div className="grid gap-3 min-[880px]:grid-cols-[1fr_auto]">
 						<div className="grid gap-2 min-[760px]:grid-cols-4">
@@ -1219,7 +1274,7 @@ function ContentRoute() {
 					</section>
 				) : null}
 
-				{contentFocus === "review" ? (
+				{contentFocus === "review" && sectionDensity === "full" ? (
 					<section
 						className={cx(surfaceCardClass, "grid gap-4 p-5 scroll-mt-4")}
 						id="loop-digest"
@@ -1834,21 +1889,28 @@ function WorkflowStat({ label, value }: { label: string; value: number }) {
 
 function SourceBoundaryRail({
 	age,
+	contentEngineBridge,
 	freshness,
 	quality,
 	source,
+	sourceBreakdown,
 }: {
 	age: string;
+	contentEngineBridge?: ContentEngineBridge;
 	freshness: string;
 	quality?: string;
 	source?: string;
+	sourceBreakdown?: AnalyticsSourceBreakdown;
 }) {
 	const items = [
 		["Read-only source bounds", "Local Birdclaw data"],
 		["Sample quality", quality ?? "Small local sample; mostly mentions"],
 		["Snapshot caveat", source ?? "Small local sample; partial X visibility"],
+		["Source mix", sourceBreakdownSummary(sourceBreakdown)],
+		["Source mix dates", sourceBreakdownFreshness(sourceBreakdown)],
 		["Source freshness", freshness],
 		["Source age", age],
+		["Content engine", contentEngineBridgeSummary(contentEngineBridge)],
 		["No X write actions", "Manual clipboard workflow"],
 		["Untrusted social text", "Review claims before posting"],
 	] as const;

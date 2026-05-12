@@ -329,6 +329,40 @@ function getProjectOpportunities(): ProjectOpportunityItem[] {
 	});
 }
 
+function getSourceBreakdown(): AnalyticsResponse["sourceBreakdown"] {
+	const db = getNativeDb();
+	const rows = db
+		.prepare(
+			`
+      select
+        kind,
+        count(*) as count,
+        max(created_at) as latest_at
+      from tweets
+      group by kind
+      order by count desc, kind asc
+      `,
+		)
+		.all() as Array<Record<string, unknown>>;
+	const kinds = rows.map((row) => ({
+		kind: String(row.kind) as "mention" | "home" | "like" | "bookmark",
+		count: Number(row.count),
+		latestAt:
+			typeof row.latest_at === "string" ? String(row.latest_at) : undefined,
+	}));
+	const totalTweets = kinds.reduce((total, item) => total + item.count, 0);
+	const latestTweetAt = kinds
+		.flatMap((item) => (item.latestAt ? [item.latestAt] : []))
+		.sort()
+		.at(-1);
+
+	return {
+		totalTweets,
+		latestTweetAt,
+		kinds,
+	};
+}
+
 function buildRecommendations({
 	accounts,
 	sharedAudience,
@@ -372,11 +406,13 @@ export function getAnalyticsSummary(): AnalyticsResponse {
 	const sharedAudience = getSharedAudience();
 	const topicSignals = getTopicSignals();
 	const projectOpportunities = getProjectOpportunities();
+	const sourceBreakdown = getSourceBreakdown();
 	return {
 		accounts,
 		sharedAudience,
 		topicSignals,
 		projectOpportunities,
+		sourceBreakdown,
 		recommendations: buildRecommendations({
 			accounts,
 			sharedAudience,

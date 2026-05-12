@@ -261,6 +261,22 @@ describe("content route", () => {
 								},
 							],
 							projectOpportunities: [],
+							sourceBreakdown: {
+								totalTweets: 68,
+								latestTweetAt: "2026-04-30T03:49:05.000Z",
+								kinds: [
+									{
+										kind: "mention",
+										count: 64,
+										latestAt: "2026-04-30T03:49:05.000Z",
+									},
+									{
+										kind: "home",
+										count: 4,
+										latestAt: "2026-03-08T11:42:00.000Z",
+									},
+								],
+							},
 							recommendations: ["Use the personal signal before drafting."],
 						}),
 					);
@@ -406,6 +422,13 @@ describe("content route", () => {
 								},
 							],
 							training: createTrainingFixture(),
+							contentEngineBridge: {
+								exportPath:
+									"/Users/clay/Documents/New project 13/content-engine/exports/birdclaw-content-lanes.json",
+								importedPersonalDrafts: 2,
+								importedProjectDrafts: 3,
+								status: "loaded",
+							},
 							safetyNote:
 								"Manual review required before any public post or reply.",
 							safetyNotes: [
@@ -431,14 +454,7 @@ describe("content route", () => {
 			screen.getByText("From live signal to reviewed copy"),
 		).toBeInTheDocument();
 		expect(screen.getByText("Best move today")).toBeInTheDocument();
-		expect(
-			Boolean(
-				screen
-					.getByText("Best move today")
-					.compareDocumentPosition(screen.getByText("40-loop digest")) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
-			),
-		).toBe(true);
+		expect(screen.queryByText("40-loop digest")).not.toBeInTheDocument();
 		expect(
 			screen.queryByText("Why these topics are worth using"),
 		).not.toBeInTheDocument();
@@ -565,6 +581,14 @@ describe("content route", () => {
 		expect(
 			screen.getByText("Small local sample; partial X visibility"),
 		).toBeInTheDocument();
+		expect(screen.getByText("Source mix")).toBeInTheDocument();
+		expect(screen.getByText("mentions 64; home 4")).toBeInTheDocument();
+		expect(screen.getByText("Source mix dates")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"latest 2026-04-30; mentions 2026-04-30; home 2026-03-08",
+			),
+		).toBeInTheDocument();
 		expect(screen.getByText("Source freshness")).toBeInTheDocument();
 		expect(
 			screen.getByText("@vantaprivacy 2026-04-30; @williamclay 2026-04-24"),
@@ -572,6 +596,12 @@ describe("content route", () => {
 		expect(screen.getByText("Source age")).toBeInTheDocument();
 		expect(
 			screen.getByText("Project 2d; personal 8d; personal source stale"),
+		).toBeInTheDocument();
+		expect(screen.getByText("Content engine")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Loaded 3 project and 2 personal drafts from birdclaw-content-lanes.json",
+			),
 		).toBeInTheDocument();
 		expect(screen.getByText("No X write actions")).toBeInTheDocument();
 		expect(screen.getByText("Manual clipboard workflow")).toBeInTheDocument();
@@ -668,6 +698,10 @@ describe("content route", () => {
 		expect(screen.getAllByText("Training drills").length).toBeGreaterThan(0);
 		expect(screen.getAllByText("Anti-patterns").length).toBeGreaterThan(0);
 		fireEvent.click(screen.getByRole("button", { name: /Review/ }));
+		expect(screen.queryByText("40-loop digest")).not.toBeInTheDocument();
+		fireEvent.change(screen.getByLabelText("View"), {
+			target: { value: "full" },
+		});
 		expect(screen.getByText("40-loop digest")).toBeInTheDocument();
 		expect(
 			screen.getByText(
@@ -681,7 +715,7 @@ describe("content route", () => {
 		).toBeInTheDocument();
 		expect(screen.getByLabelText("Goal")).toHaveValue("all");
 		expect(screen.getByLabelText("Job")).toHaveValue("all");
-		expect(screen.getByLabelText("View")).toHaveValue("scan");
+		expect(screen.getByLabelText("View")).toHaveValue("full");
 		expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
 			"aria-pressed",
 			"true",
