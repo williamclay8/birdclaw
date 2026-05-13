@@ -620,6 +620,16 @@ describe("content route", () => {
 		expect(
 			screen.getByText("Review claims before posting"),
 		).toBeInTheDocument();
+		expect(screen.getByText("UI/UX digestibility")).toBeInTheDocument();
+		expect(screen.getByText("Current taste/voice")).toBeInTheDocument();
+		expect(
+			screen.getByText("Best move first; evidence and queues stay secondary."),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"@vantaprivacy turns that mechanism into receipts, permissions, limits, and beta-safe proof.",
+			),
+		).toBeInTheDocument();
 		expect(screen.getByText("Artifact check")).toBeInTheDocument();
 		expect(screen.getAllByText("receipt screenshot").length).toBeGreaterThan(0);
 		expect(screen.getByText("Claim check")).toBeInTheDocument();

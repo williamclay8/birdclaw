@@ -57,6 +57,27 @@ const VOICE_LOOP_DIGEST = [
 	"Payment-as-credential posts should name access control: wallet identity, rate, quota, limit, provider, receipt.",
 ] as const;
 
+const LOOP_TRACK_SUMMARIES = [
+	{
+		checks: [
+			"Best move first; evidence and queues stay secondary.",
+			"Risk, source age, and artifact state visible before copy.",
+			"Filters describe the job: account, goal, artifact, reply review.",
+		],
+		lead: "Make the command center scannable before asking Clay to read the full workflow.",
+		title: "UI/UX digestibility",
+	},
+	{
+		checks: [
+			"@williamclay names the mechanism under timeline spectacle.",
+			"@vantaprivacy turns that mechanism into receipts, permissions, limits, and beta-safe proof.",
+			"Current agent-payment/x402 lanes need metadata, offer, receipt, quota, and signing boundaries.",
+		],
+		lead: "Keep the personal scout sharper and the project account calmer, useful, and artifact-backed.",
+		title: "Current taste/voice",
+	},
+] as const;
+
 function accountFilterLabel(value: AccountFilter) {
 	if (value === "project") return "Publish: @vantaprivacy";
 	if (value === "personal") return "Scout: @williamclay";
@@ -993,6 +1014,7 @@ function ContentRoute() {
 						source={workflow?.engagementPlaybook?.source}
 						sourceBreakdown={analytics?.sourceBreakdown}
 					/>
+					<LoopTrackCompass />
 					<div className="grid gap-3 min-[880px]:grid-cols-[1fr_auto]">
 						<div className="grid gap-2 min-[760px]:grid-cols-4">
 							<WorkflowStat
@@ -2012,6 +2034,32 @@ function ContentLoopDigestList({
 				))}
 			</ul>
 		</div>
+	);
+}
+
+function LoopTrackCompass() {
+	return (
+		<section
+			aria-label="Hourly loop track summaries"
+			className="grid gap-3 rounded-[18px] bg-[color:color-mix(in_srgb,var(--accent-soft)_24%,var(--panel-strong))] p-3 shadow-[inset_0_0_0_1px_var(--line)] min-[860px]:grid-cols-2"
+		>
+			{LOOP_TRACK_SUMMARIES.map((track) => (
+				<article
+					className="grid min-w-0 gap-2 rounded-[14px] bg-[var(--panel)] p-3 shadow-[inset_0_0_0_1px_var(--line)]"
+					key={track.title}
+				>
+					<p className={cx(eyebrowClass, "mb-0")}>{track.title}</p>
+					<p className="m-0 text-sm font-medium leading-relaxed text-[var(--ink)]">
+						{track.lead}
+					</p>
+					<ul className="m-0 grid gap-1.5 pl-4 text-[0.84rem] leading-relaxed text-[var(--ink-soft)]">
+						{track.checks.map((item) => (
+							<li key={item}>{item}</li>
+						))}
+					</ul>
+				</article>
+			))}
+		</section>
 	);
 }
 
