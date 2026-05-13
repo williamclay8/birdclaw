@@ -474,6 +474,12 @@ describe("content route", () => {
 			"false",
 		);
 		expect(screen.getByText("Today pick")).toBeInTheDocument();
+		expect(screen.getByText("Why:")).toBeInTheDocument();
+		expect(
+			screen.getAllByText(
+				"It has a visible tension and a concrete receipt surface.",
+			).length,
+		).toBeGreaterThan(0);
 		expect(
 			screen.getByText(
 				"Source: Project 2d; personal 8d; personal source stale; X text untrusted; clipboard only",

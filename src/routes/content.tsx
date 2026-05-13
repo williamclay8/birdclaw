@@ -923,6 +923,11 @@ function ContentRoute() {
 											{primaryMove.algorithmFit.rankingSignal}
 										</p>
 									) : null}
+									<p className="m-0 text-[0.82rem] leading-relaxed text-[var(--ink-soft)]">
+										<span className="font-medium text-[var(--ink)]">Why:</span>{" "}
+										{primaryMove.algorithmFit?.whyItCanTravel ??
+											primaryMove.why}
+									</p>
 								</div>
 								<PublishReadinessStrip
 									artifactNeeded={primaryMove.artifactNeeded}
