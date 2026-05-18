@@ -49,6 +49,25 @@ function json(data: unknown) {
 	});
 }
 
+function errorJson(kind: string, error: unknown) {
+	const message = error instanceof Error ? error.message : String(error);
+	return new Response(
+		JSON.stringify({
+			ok: false,
+			error: {
+				kind,
+				message,
+			},
+		}),
+		{
+			status: 503,
+			headers: {
+				"content-type": "application/json",
+			},
+		},
+	);
+}
+
 function contentEngineExportPaths() {
 	return [
 		process.env.VANTA_CONTENT_ENGINE_EXPORT,
@@ -238,12 +257,28 @@ export const Route = createFileRoute("/api/content-workflow")({
 	server: {
 		handlers: {
 			GET: async () => {
-				await maybeAutoUpdateBackup();
-				return json(
-					withContentEngineExport(
-						buildProjectContentWorkflow(getAnalyticsSummary()),
-					),
-				);
+				try {
+					await maybeAutoUpdateBackup();
+				} catch (error) {
+					return errorJson("backup_unavailable", error);
+				}
+
+				let analyticsSummary: ReturnType<typeof getAnalyticsSummary>;
+				try {
+					analyticsSummary = getAnalyticsSummary();
+				} catch (error) {
+					return errorJson("analytics_unavailable", error);
+				}
+
+				try {
+					return json(
+						withContentEngineExport(
+							buildProjectContentWorkflow(analyticsSummary),
+						),
+					);
+				} catch (error) {
+					return errorJson("content_workflow_unavailable", error);
+				}
 			},
 		},
 	},

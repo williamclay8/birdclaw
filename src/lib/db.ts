@@ -1,4 +1,7 @@
-import BetterSqlite3 from "better-sqlite3";
+import fs from "node:fs";
+import path from "node:path";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
 import { Kysely, SqliteDialect } from "kysely";
 import { ensureBirdclawDirs, getBirdclawPaths } from "./config";
 import { seedDemoData } from "./seed";
@@ -126,7 +129,55 @@ export interface BirdclawDatabase {
 	sync_cache: SyncCacheTable;
 }
 
-let nativeDb: BetterSqlite3.Database | undefined;
+const require = createRequire(import.meta.url);
+
+function readExpectedNodeVersion() {
+	const candidates = [
+		path.join(process.cwd(), ".node-version"),
+		path.join(process.cwd(), "..", ".node-version"),
+	];
+
+	for (const candidate of candidates) {
+		try {
+			return fs.readFileSync(candidate, "utf8").trim();
+		} catch {
+			// ignore
+		}
+	}
+
+	return null;
+}
+
+function loadBetterSqlite3() {
+	try {
+		return require("better-sqlite3") as unknown as {
+			new (dbPath: string): Database.Database;
+		};
+	} catch (error) {
+		if (error instanceof Error) {
+			const expected = readExpectedNodeVersion();
+			const hintLines = [
+				"birdclaw: Failed to load the native `better-sqlite3` addon.",
+				`  node: ${process.version}`,
+				expected ? `  expected (from .node-version): ${expected}` : null,
+				"",
+				"Fix: switch Node and reinstall native deps (or rebuild for your current Node).",
+				expected
+					? `  fnm use ${expected}`
+					: "  (switch to the project Node version)",
+				"  corepack pnpm install",
+				"",
+				`Original error: ${error.message}`,
+			].filter(Boolean);
+
+			throw new Error(hintLines.join("\n"));
+		}
+
+		throw error;
+	}
+}
+
+let nativeDb: Database.Database | undefined;
 let kyselyDb: Kysely<BirdclawDatabase> | undefined;
 
 export interface InitDatabaseOptions {
@@ -277,17 +328,14 @@ const INDEX_SQL = `
   create index if not exists idx_sync_cache_updated on sync_cache(updated_at desc);
 `;
 
-function getColumnNames(
-	db: BetterSqlite3.Database,
-	tableName: string,
-): Set<string> {
+function getColumnNames(db: Database.Database, tableName: string): Set<string> {
 	const rows = db.prepare(`pragma table_info(${tableName})`).all() as Array<{
 		name: string;
 	}>;
 	return new Set(rows.map((row) => row.name));
 }
 
-function ensureTweetMetadataColumns(db: BetterSqlite3.Database) {
+function ensureTweetMetadataColumns(db: Database.Database) {
 	const columnNames = getColumnNames(db, "tweets");
 	if (!columnNames.has("entities_json")) {
 		db.exec(
@@ -304,21 +352,21 @@ function ensureTweetMetadataColumns(db: BetterSqlite3.Database) {
 	}
 }
 
-function ensureProfileAvatarColumns(db: BetterSqlite3.Database) {
+function ensureProfileAvatarColumns(db: Database.Database) {
 	const columnNames = getColumnNames(db, "profiles");
 	if (!columnNames.has("avatar_url")) {
 		db.exec("alter table profiles add column avatar_url text");
 	}
 }
 
-function ensureAccountExternalUserIdColumn(db: BetterSqlite3.Database) {
+function ensureAccountExternalUserIdColumn(db: Database.Database) {
 	const columnNames = getColumnNames(db, "accounts");
 	if (!columnNames.has("external_user_id")) {
 		db.exec("alter table accounts add column external_user_id text");
 	}
 }
 
-function ensureTweetCollectionsTable(db: BetterSqlite3.Database) {
+function ensureTweetCollectionsTable(db: Database.Database) {
 	db.exec(`
     create table if not exists tweet_collections (
       account_id text not null,
@@ -333,7 +381,7 @@ function ensureTweetCollectionsTable(db: BetterSqlite3.Database) {
   `);
 }
 
-function backfillTweetCollections(db: BetterSqlite3.Database) {
+function backfillTweetCollections(db: Database.Database) {
 	const now = new Date().toISOString();
 	const insert = db.prepare(`
     insert or ignore into tweet_collections (
@@ -354,7 +402,7 @@ function backfillTweetCollections(db: BetterSqlite3.Database) {
 	})();
 }
 
-function ensureSchemaIndexes(db: BetterSqlite3.Database) {
+function ensureSchemaIndexes(db: Database.Database) {
 	db.exec(INDEX_SQL);
 }
 
@@ -363,6 +411,7 @@ function initDatabase(options: InitDatabaseOptions = {}) {
 
 	if (!nativeDb) {
 		const { dbPath } = getBirdclawPaths();
+		const BetterSqlite3 = loadBetterSqlite3();
 		nativeDb = new BetterSqlite3(dbPath);
 		nativeDb.exec(BASE_SCHEMA_SQL);
 		ensureAccountExternalUserIdColumn(nativeDb);
@@ -387,7 +436,7 @@ function initDatabase(options: InitDatabaseOptions = {}) {
 
 export function getNativeDb(options: InitDatabaseOptions = {}) {
 	initDatabase(options);
-	return nativeDb as BetterSqlite3.Database;
+	return nativeDb as Database.Database;
 }
 
 export function getDb() {
