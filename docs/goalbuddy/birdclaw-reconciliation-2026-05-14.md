@@ -2,6 +2,18 @@
 
 Repo: `/Users/clay/Documents/Codex/2026-04-30/https-github-com-steipete-birdclaw`
 
+## Owner Decision Update - 2026-06-16
+
+Clay approved upstream publication.
+
+- Clay reversed the fork-only choice and approved upstream publication.
+- Current route: prepare and push Clay's Birdclaw work to upstream `origin/main`.
+- Fork route: `fork/main` remains a synced staging copy.
+- Push rule: direct push to `origin/main` is owner-approved for this tranche after verification passes.
+- Status at decision time: working tree clean; `fork/main...HEAD` = `0 0`; `origin/main...HEAD` = `0 22`.
+- Verification refresh: `format:check`, `lint`, `coverage`, `build`, and `e2e` passed on 2026-06-16 after adding analytics coverage and updating stale Playwright assertions.
+- Push blocker: `git fetch origin main` advanced upstream to `be321a1`; local `main` is now behind `origin/main` by 341 commits, so upstream publication requires an explicit integration/rebase instead of a direct push.
+
 ## Current State
 
 - Branch: `main`

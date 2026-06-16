@@ -4,11 +4,13 @@ test("navigates across the primary surfaces", async ({ page }) => {
 	await page.goto("/");
 
 	await expect(
-		page.getByRole("heading", { name: "Quiet signal for Twitter." }),
+		page.getByRole("heading", {
+			name: "Quiet signal from your Twitter memory.",
+		}),
 	).toBeVisible();
 	await expect(
 		page.getByRole("heading", {
-			name: "Read first. Act only where signal survives.",
+			name: "Find the signal worth answering.",
 		}),
 	).toBeVisible();
 
@@ -28,7 +30,9 @@ test("navigates across the primary surfaces", async ({ page }) => {
 
 	await page.getByRole("link", { name: "Inbox" }).click();
 	await expect(
-		page.getByRole("heading", { name: "AI triage for mentions and DMs." }),
+		page.getByRole("heading", {
+			name: "Find the replies worth your attention.",
+		}),
 	).toBeVisible();
 	await expect(page.locator(".inbox-card")).toHaveCount(3);
 
@@ -104,7 +108,7 @@ test("filters the home timeline by reply state", async ({ page }) => {
 	await expect(cards.first()).toContainText("best product teams");
 
 	await page.getByRole("button", { name: /^unreplied$/ }).click();
-	await expect(cards).toHaveCount(3);
+	await expect(cards).toHaveCount(2);
 });
 
 test("expands timeline cards with media, quote context, and profile hover", async ({
